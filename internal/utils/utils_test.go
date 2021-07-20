@@ -49,6 +49,15 @@ func TestBatchSplit4(t *testing.T) {
 	batchSplitTest(t, 4, expected)
 }
 
+// checks on error
+func TestBatchSplit5(t *testing.T) {
+	var _, err = BatchSplit(batchSplitData, len(batchSplitData) + 1)
+
+	if err == nil {
+		t.Errorf("Batch split err is not nil")
+	}
+}
+
 //
 // ReverseMap
 //
@@ -82,4 +91,20 @@ func TestFilterSlice3(t *testing.T) {
 	var expected = []string{"world", "school", "test"}
 
 	assertEqual(t, res, expected)
+}
+
+// checks on error if data is empty
+func TestFilterSlice4(t *testing.T) {
+	var res = FilterSlice(nil, []string{"hello", "golang", "utils"})
+
+	if res != nil {
+		t.Errorf("FilterSlice res should be nil if filter data is empty")
+	}
+}
+
+// checks on the same data if filter is empty
+func TestFilterSlice5(t *testing.T) {
+	var res = FilterSlice(filterSliceData, nil)
+
+	assertEqual(t, res, res)
 }
