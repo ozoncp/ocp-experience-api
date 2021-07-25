@@ -1,7 +1,13 @@
 package utils
 
-import "math"
-import "errors"
+import (
+	"errors"
+	"fmt"
+	"io"
+	"log"
+	"math"
+	"os"
+)
 
 // BatchSplit splits entire slice to same batches with batch size, except last batch,
 // returns error if can not split
@@ -70,4 +76,43 @@ func FilterSlice(in, filter []string) []string {
 	}
 
 	return result
+}
+
+// ReadFileInLoop reads file in loop count arg times
+func ReadFileInLoop(filePath string, count int) error {
+	var readFileFunc = func() ([]byte, error) {
+		var file, err = os.OpenFile(filePath, os.O_RDONLY, os.ModeType)
+
+		if err != nil {
+			return nil, err
+		}
+
+		defer func() {
+			var err = file.Close()
+
+			if err != nil {
+				log.Fatal(err)
+			}
+		}()
+
+		var data, readErr = io.ReadAll(file)
+
+		if readErr != nil {
+			return nil, err
+		}
+
+		return data, nil
+	}
+
+	for i := 0; i < count; i++ {
+		var data, err = readFileFunc()
+
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("ReadFileInLoop iteration: %v, data: %v\n", i, string(data))
+	}
+
+	return nil
 }

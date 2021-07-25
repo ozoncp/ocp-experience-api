@@ -1,6 +1,9 @@
 package utils
 
 import (
+	"github.com/stretchr/testify/assert"
+	"log"
+	"os"
 	"reflect"
 	"testing"
 )
@@ -107,4 +110,55 @@ func TestFilterSlice5(t *testing.T) {
 	var res = FilterSlice(filterSliceData, nil)
 
 	assertEqual(t, res, res)
+}
+
+//
+// ReadFileInLoop
+//
+const loopFileName = "/test_loop_file.txt"
+
+// creates and writes test file by file name (file path)
+func createTestLoopFile(fileName string) error {
+	var file, err = os.OpenFile(fileName, os.O_CREATE, os.ModePerm)
+
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		var err = file.Close()
+
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	file.WriteString("TestInformation")
+	return nil
+}
+
+// main TestReadFileInLoop body
+func testReadFileInLoop(t *testing.T, fileName string, count int) {
+	var err = createTestLoopFile(fileName)
+
+	if err != nil {
+		log.Fatalf("Can not create file, err %v", err.Error())
+	}
+
+	var readErr = ReadFileInLoop(fileName,count)
+	assert.Equal(t, readErr, nil)
+
+	var removeErr = os.Remove(fileName)
+
+	if removeErr != nil {
+		log.Fatalf("Can not remove file, %v", err.Error())
+	}
+}
+
+func TestReadFileInLoop1(t *testing.T) {
+	testReadFileInLoop(t, loopFileName, 1)
+}
+
+func TestReadFileInLoop2(t *testing.T) {
+	testReadFileInLoop(t, loopFileName, 5)
 }
