@@ -39,11 +39,10 @@ func ConvertExperienceToMap(entities []models.Experience) (map[uint64]models.Exp
 		return nil, errors.New("entire Experience slice is empty")
 	}
 
-	var res = make(map[uint64]models.Experience, len(entities))
+	var res = make(map[uint64]models.Experience, entitiesSize)
 
-	for i := 0; i < entitiesSize; i++ {
-		var value = entities[i]
-		res[value.Id] = value
+	for _, entity := range entities {
+		res[entity.Id] = entity
 	}
 
 	return res, nil

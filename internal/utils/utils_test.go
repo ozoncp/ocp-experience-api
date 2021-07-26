@@ -115,7 +115,7 @@ func TestFilterSlice5(t *testing.T) {
 //
 // ReadFileInLoop
 //
-const loopFileName = "/test_loop_file.txt"
+const loopFileName = "./test_loop_file.txt"
 
 // creates and writes test file by file name (file path)
 func createTestLoopFile(fileName string) error {
