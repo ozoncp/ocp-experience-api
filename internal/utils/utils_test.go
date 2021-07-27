@@ -1,6 +1,9 @@
 package utils
 
 import (
+	"github.com/stretchr/testify/assert"
+	"log"
+	"os"
 	"reflect"
 	"testing"
 )
@@ -17,7 +20,7 @@ func assertEqual(t *testing.T, current, expected interface{}) {
 
 // batch split test wrapper
 func batchSplitTest(t *testing.T, batches int, expected [][]string) {
-	var res, err = BatchSplit(batchSplitData, batches)
+	res, err := BatchSplit(batchSplitData, batches)
 
 	if err != nil {
 		t.Errorf("Batch split error, %s", err.Error())
@@ -30,28 +33,28 @@ func batchSplitTest(t *testing.T, batches int, expected [][]string) {
 // BatchSplit
 //
 func TestBatchSplit1(t *testing.T) {
-	var expected = [][]string{{"hello"}, {"world"}, {"golang"}, {"school"}, {"test"}, {"utils"}}
+	expected := [][]string{{"hello"}, {"world"}, {"golang"}, {"school"}, {"test"}, {"utils"}}
 	batchSplitTest(t, 1, expected)
 }
 
 func TestBatchSplit2(t *testing.T) {
-	var expected = [][]string{{"hello", "world"}, {"golang", "school"}, {"test", "utils"}}
+	expected := [][]string{{"hello", "world"}, {"golang", "school"}, {"test", "utils"}}
 	batchSplitTest(t, 2, expected)
 }
 
 func TestBatchSplit3(t *testing.T) {
-	var expected = [][]string{{"hello", "world", "golang"}, {"school", "test", "utils"}}
+	expected := [][]string{{"hello", "world", "golang"}, {"school", "test", "utils"}}
 	batchSplitTest(t, 3, expected)
 }
 
 func TestBatchSplit4(t *testing.T) {
-	var expected = [][]string{{"hello", "world", "golang", "school"}, {"test", "utils"}}
+	expected := [][]string{{"hello", "world", "golang", "school"}, {"test", "utils"}}
 	batchSplitTest(t, 4, expected)
 }
 
 // checks on error
 func TestBatchSplit5(t *testing.T) {
-	var _, err = BatchSplit(batchSplitData, len(batchSplitData) + 1)
+	_, err := BatchSplit(batchSplitData, len(batchSplitData) + 1)
 
 	if err == nil {
 		t.Errorf("Batch split err is not nil")
@@ -62,9 +65,9 @@ func TestBatchSplit5(t *testing.T) {
 // ReverseMap
 //
 func TestReverseMap(t *testing.T) {
-	var data = map[string]string {"key1" : "value1"}
-	var res = ReverseMap(data)
-	var expected = map[string]string {"value1" : "key1"}
+	data := map[string]string {"key1" : "value1"}
+	res := ReverseMap(data)
+	expected := map[string]string {"value1" : "key1"}
 
 	assertEqual(t, res, expected)
 }
@@ -73,29 +76,29 @@ func TestReverseMap(t *testing.T) {
 // FilterSlice
 //
 func TestFilterSlice1(t *testing.T) {
-	var res = FilterSlice(filterSliceData, []string{"hello"})
-	var expected = []string{"world", "golang", "school", "test", "utils"}
+	res := FilterSlice(filterSliceData, []string{"hello"})
+	expected := []string{"world", "golang", "school", "test", "utils"}
 
 	assertEqual(t, res, expected)
 }
 
 func TestFilterSlice2(t *testing.T) {
-	var res = FilterSlice(filterSliceData, []string{"hello", "golang"})
-	var expected = []string{"world", "school", "test", "utils"}
+	res := FilterSlice(filterSliceData, []string{"hello", "golang"})
+	expected := []string{"world", "school", "test", "utils"}
 
 	assertEqual(t, res, expected)
 }
 
 func TestFilterSlice3(t *testing.T) {
-	var res = FilterSlice(filterSliceData, []string{"hello", "golang", "utils"})
-	var expected = []string{"world", "school", "test"}
+	res := FilterSlice(filterSliceData, []string{"hello", "golang", "utils"})
+	expected := []string{"world", "school", "test"}
 
 	assertEqual(t, res, expected)
 }
 
 // checks on error if data is empty
 func TestFilterSlice4(t *testing.T) {
-	var res = FilterSlice(nil, []string{"hello", "golang", "utils"})
+	res := FilterSlice(nil, []string{"hello", "golang", "utils"})
 
 	if res != nil {
 		t.Errorf("FilterSlice res should be nil if filter data is empty")
@@ -104,7 +107,58 @@ func TestFilterSlice4(t *testing.T) {
 
 // checks on the same data if filter is empty
 func TestFilterSlice5(t *testing.T) {
-	var res = FilterSlice(filterSliceData, nil)
+	res := FilterSlice(filterSliceData, nil)
 
 	assertEqual(t, res, res)
+}
+
+//
+// ReadFileInLoop
+//
+const loopFileName = "./test_loop_file.txt"
+
+// creates and writes test file by file name (file path)
+func createTestLoopFile(fileName string) error {
+	file, err := os.OpenFile(fileName, os.O_CREATE, os.ModePerm)
+
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		err := file.Close()
+
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	file.WriteString("TestInformation")
+	return nil
+}
+
+// main TestReadFileInLoop body
+func testReadFileInLoop(t *testing.T, fileName string, count int) {
+	err := createTestLoopFile(fileName)
+
+	if err != nil {
+		log.Fatalf("Can not create file, err %v", err.Error())
+	}
+
+	readErr := ReadFileInLoop(fileName,count)
+	assert.Equal(t, readErr, nil)
+
+	removeErr := os.Remove(fileName)
+
+	if removeErr != nil {
+		log.Fatalf("Can not remove file, %v", err.Error())
+	}
+}
+
+func TestReadFileInLoop1(t *testing.T) {
+	testReadFileInLoop(t, loopFileName, 1)
+}
+
+func TestReadFileInLoop2(t *testing.T) {
+	testReadFileInLoop(t, loopFileName, 5)
 }
