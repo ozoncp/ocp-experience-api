@@ -19,7 +19,7 @@ var splitExperienceToBulksData = []models.Experience{
 
 // bulks split test wrapper
 func splitExperienceToBulksTest(t *testing.T, batches int, expected [][]models.Experience) {
-	var res, err = SplitExperienceToBulks(splitExperienceToBulksData, batches)
+	res, err := SplitExperienceToBulks(splitExperienceToBulksData, batches)
 
 	assert.Equal(t, err, nil)
 	assert.Equal(t, res, expected)
@@ -29,7 +29,7 @@ func splitExperienceToBulksTest(t *testing.T, batches int, expected [][]models.E
 // SplitExperienceToBulks
 //
 func TestSplitExperienceToBulks1(t *testing.T) {
-	var expected = [][]models.Experience{
+	expected := [][]models.Experience{
 		{ models.NewExperience(1, 1, 1, time.Time{}, time.Time{}, 1) },
 		{ models.NewExperience(2, 2, 2, time.Time{}, time.Time{}, 2) },
 		{ models.NewExperience(3, 3, 3, time.Time{}, time.Time{}, 3) },
@@ -42,7 +42,7 @@ func TestSplitExperienceToBulks1(t *testing.T) {
 }
 
 func TestSplitExperienceToBulks2(t *testing.T) {
-	var expected = [][]models.Experience{
+	expected := [][]models.Experience{
 		{
 			models.NewExperience(1, 1, 1, time.Time{}, time.Time{}, 1),
 			models.NewExperience(2, 2, 2, time.Time{}, time.Time{}, 2),
@@ -61,7 +61,7 @@ func TestSplitExperienceToBulks2(t *testing.T) {
 }
 
 func TestSplitExperienceToBulks3(t *testing.T) {
-	var expected = [][]models.Experience{
+	expected := [][]models.Experience{
 		{
 			models.NewExperience(1, 1, 1, time.Time{}, time.Time{}, 1),
 			models.NewExperience(2, 2, 2, time.Time{}, time.Time{}, 2),
@@ -78,7 +78,7 @@ func TestSplitExperienceToBulks3(t *testing.T) {
 }
 
 func TestSplitExperienceToBulks4(t *testing.T) {
-	var expected = [][]models.Experience{
+	expected := [][]models.Experience{
 		{
 			models.NewExperience(1, 1, 1, time.Time{}, time.Time{}, 1),
 			models.NewExperience(2, 2, 2, time.Time{}, time.Time{}, 2),
@@ -96,7 +96,7 @@ func TestSplitExperienceToBulks4(t *testing.T) {
 
 // checks on error
 func TestSplitExperienceToBulks5(t *testing.T) {
-	var _, err = BatchSplit(batchSplitData, len(batchSplitData) + 1)
+	_, err := BatchSplit(batchSplitData, len(batchSplitData) + 1)
 	assert.NotEqual(t, err, nil)
 }
 
@@ -104,14 +104,14 @@ func TestSplitExperienceToBulks5(t *testing.T) {
 // ConvertExperienceToMap
 //
 func TestConvertExperienceToMap1(t *testing.T) {
-	var data = []models.Experience {
+	data := []models.Experience {
 		models.NewExperience(1, 1, 1, time.Time{}, time.Time{}, 1),
 		models.NewExperience(2, 2, 2, time.Time{}, time.Time{}, 2),
 		models.NewExperience(3, 3, 3, time.Time{}, time.Time{}, 3),
 	}
 
-	var res, err = ConvertExperienceToMap(data)
-	var expected = map[uint64]models.Experience {
+	res, err := ConvertExperienceToMap(data)
+	expected := map[uint64]models.Experience {
 		1 : models.NewExperience(1, 1, 1, time.Time{}, time.Time{}, 1),
 		2 : models.NewExperience(2, 2, 2, time.Time{}, time.Time{}, 2),
 		3 : models.NewExperience(3, 3, 3, time.Time{}, time.Time{}, 3),
@@ -124,7 +124,7 @@ func TestConvertExperienceToMap1(t *testing.T) {
 // checks on error
 func TestConvertExperienceToMap2(t *testing.T) {
 	var data []models.Experience = nil
-	var _, err = ConvertExperienceToMap(data)
+	_, err := ConvertExperienceToMap(data)
 
 	assert.NotEqual(t, err, nil)
 }
