@@ -40,7 +40,7 @@ func (f *flusher) Flush(experiences []models.Experience) ([]models.Experience, e
 
 			if addErr != nil {
 				remains = append(remains, experiences[index * int(f.chunkSize):]...)
-				return remains, err
+				return remains, addErr
 			}
 		} else {
 			remains = append(remains, bulk...) // last bulk should be kept in buffer
