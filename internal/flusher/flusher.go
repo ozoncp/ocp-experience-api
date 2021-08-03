@@ -35,15 +35,14 @@ func (f *flusher) Flush(experiences []models.Experience) ([]models.Experience, e
 	}
 
 	for index, bulk := range bulks {
-		if len(bulk) == int(f.chunkSize) {
-			addErr := f.requestRepo.Add(bulk)
-
-			if addErr != nil {
-				remains = append(remains, experiences[index * int(f.chunkSize):]...)
-				return remains, addErr
-			}
-		} else {
+		if len(bulk) != int(f.chunkSize) {
 			remains = append(remains, bulk...) // last bulk should be kept in buffer
+			continue
+		}
+		addErr := f.requestRepo.Add(bulk)
+		if addErr != nil {
+			remains = append(remains, experiences[index * int(f.chunkSize):]...)
+			return remains, addErr
 		}
 	}
 
