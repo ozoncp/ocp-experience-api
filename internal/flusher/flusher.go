@@ -39,7 +39,9 @@ func (f *flusher) Flush(experiences []models.Experience) ([]models.Experience, e
 			remains = append(remains, bulk...) // last bulk should be kept in buffer
 			continue
 		}
+
 		addErr := f.requestRepo.Add(bulk)
+
 		if addErr != nil {
 			remains = append(remains, experiences[index * int(f.chunkSize):]...)
 			return remains, addErr
