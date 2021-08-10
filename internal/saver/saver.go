@@ -9,9 +9,11 @@ import (
 )
 
 // saver states
+type saverStates int8
+
 const (
-	saverInitialized = 0x01
-	saverClosed      = 0x02
+	saverInitialized saverStates = 0x01 << iota
+	saverClosed
 )
 
 // Saver saves Experience into storage.
@@ -44,7 +46,7 @@ type saver struct {
 	flusher      flusher.Flusher
 	queueChan    chan models.Experience
 	entities     []models.Experience
-	state        int8 // state may be initialized or closed
+	state        saverStates // state may be initialized or closed
 	tickDuration time.Duration
 	closeChan    chan struct{}
 }
@@ -115,7 +117,7 @@ func (s *saver) isInitialized() bool {
 }
 
 // sets state by |= flag
-func (s *saver) setState(state int8) {
+func (s *saver) setState(state saverStates) {
 	s.state |= state
 }
 
