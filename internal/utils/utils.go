@@ -55,7 +55,7 @@ func FilterSlice(in, filter []string) []string {
 		return in
 	}
 
-	containsFunc := func(filter []string, value string, ) bool {
+	containsFunc := func(filter []string, value string) bool {
 		for i := 0; i < len(filter); i++ {
 			if filter[i] == value {
 				return true

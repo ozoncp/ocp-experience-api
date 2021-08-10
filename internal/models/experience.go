@@ -7,23 +7,23 @@ import (
 
 // Experience describes user experience info
 type Experience struct {
-	Id uint64
+	Id     uint64
 	UserId uint64
-	Type uint64
-	From time.Time
-	To time.Time
-	Level uint64
+	Type   uint64
+	From   time.Time
+	To     time.Time
+	Level  uint64
 }
 
 // NewExperience creates Experience new instance
 func NewExperience(id, userId, t uint64, from, to time.Time, level uint64) Experience {
 	return Experience{
-		Id : id,
+		Id:     id,
 		UserId: userId,
-		Type: t,
-		From: from,
-		To: to,
-		Level: level,
+		Type:   t,
+		From:   from,
+		To:     to,
+		Level:  level,
 	}
 }
 

@@ -11,7 +11,7 @@ import (
 // saver states
 const (
 	saverInitialized = 0x01
-	saverClosed = 0x02
+	saverClosed      = 0x02
 )
 
 // Saver saves Experience into storage.
@@ -27,12 +27,12 @@ type Saver interface {
 // duration represents tick range
 func NewSaver(capacity uint, flusher flusher.Flusher, duration time.Duration) Saver {
 	s := &saver{
-		capacity:   capacity,
-		flusher:    flusher,
-		queueChan: make(chan models.Experience, capacity),
-		entities: make([]models.Experience, 0, capacity),
+		capacity:     capacity,
+		flusher:      flusher,
+		queueChan:    make(chan models.Experience, capacity),
+		entities:     make([]models.Experience, 0, capacity),
 		tickDuration: duration,
-		closeChan : make(chan struct{}),
+		closeChan:    make(chan struct{}),
 	}
 
 	return s
@@ -40,13 +40,13 @@ func NewSaver(capacity uint, flusher flusher.Flusher, duration time.Duration) Sa
 
 // Implements Saver interface
 type saver struct {
-	capacity uint
-	flusher	flusher.Flusher
-	queueChan	chan models.Experience
-	entities []models.Experience
-	state	int8	// state may be initialized or closed
+	capacity     uint
+	flusher      flusher.Flusher
+	queueChan    chan models.Experience
+	entities     []models.Experience
+	state        int8 // state may be initialized or closed
 	tickDuration time.Duration
-	closeChan chan struct{}
+	closeChan    chan struct{}
 }
 
 // Save saves Experience into storage
@@ -103,7 +103,6 @@ func (s *saver) run() {
 		}
 	}
 }
-
 
 // returns true if saver closed
 func (s *saver) isClosed() bool {

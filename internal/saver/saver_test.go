@@ -26,7 +26,7 @@ func makeExperienceEntities(num uint64) []models.Experience {
 
 var _ = Describe("Saver", func() {
 	var (
-		s		saver.Saver
+		s           saver.Saver
 		mockFlusher *mocks.MockFlusher
 		mockCtrl    *gomock.Controller
 		entities    []models.Experience
@@ -51,7 +51,7 @@ var _ = Describe("Saver", func() {
 			s.Init()
 			defer s.Close()
 
-			mockFlusher.EXPECT().Flush(gomock.Any()).MinTimes(1).Return(entities, nil)
+			mockFlusher.EXPECT().Flush(gomock.Eq(entities)).Times(1).Return(nil, nil)
 
 			for _, e := range entities {
 				s.Save(e)
@@ -65,15 +65,14 @@ var _ = Describe("Saver", func() {
 			s.Init()
 			defer s.Close()
 
-			mockFlusher.EXPECT().Flush(gomock.Any()).MaxTimes(1).Return(entities[:len(entities)/2], nil)
+			callFirst := mockFlusher.EXPECT().Flush(gomock.Eq(entities[:len(entities)/2])).Times(1).Return(nil, nil)
+			mockFlusher.EXPECT().Flush(gomock.Eq(entities[len(entities)/2:])).Times(1).Return(nil, nil).After(callFirst)
 
 			for _, e := range entities[:len(entities)/2] {
 				s.Save(e)
 			}
 
-			time.Sleep(time.Millisecond * 200)
-
-			mockFlusher.EXPECT().Flush(gomock.Any()).MaxTimes(1).Return(entities[len(entities)/2:], nil)
+			time.Sleep(time.Millisecond * 250)
 
 			for _, e := range entities[len(entities)/2:] {
 				s.Save(e)
@@ -87,7 +86,7 @@ var _ = Describe("Saver", func() {
 			s.Init()
 			defer s.Close()
 
-			mockFlusher.EXPECT().Flush(gomock.Any()).MaxTimes(0)
+			mockFlusher.EXPECT().Flush(gomock.Any()).Times(0)
 
 			for _, e := range entities {
 				s.Save(e)
