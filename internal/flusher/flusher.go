@@ -12,7 +12,7 @@ type Flusher interface {
 }
 
 // NewFlusher creates a new Flusher instance that writes experience to storage
-func NewFlusher(chunkSize uint, requestRepo repo.Repo, ) Flusher {
+func NewFlusher(chunkSize uint, requestRepo repo.Repo) Flusher {
 	return &flusher{
 		chunkSize:   chunkSize,
 		requestRepo: requestRepo,
@@ -39,9 +39,11 @@ func (f *flusher) Flush(experiences []models.Experience) ([]models.Experience, e
 			remains = append(remains, bulk...) // last bulk should be kept in buffer
 			continue
 		}
+
 		addErr := f.requestRepo.Add(bulk)
+
 		if addErr != nil {
-			remains = append(remains, experiences[index * int(f.chunkSize):]...)
+			remains = append(remains, experiences[index*int(f.chunkSize):]...)
 			return remains, addErr
 		}
 	}

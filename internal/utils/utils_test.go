@@ -9,7 +9,7 @@ import (
 )
 
 var batchSplitData = []string{"hello", "world", "golang", "school", "test", "utils"}
-var filterSliceData = batchSplitData	// change if you need
+var filterSliceData = batchSplitData // change if you need
 
 // checks slice or map on equality
 func assertEqual(t *testing.T, current, expected interface{}) {
@@ -54,7 +54,7 @@ func TestBatchSplit4(t *testing.T) {
 
 // checks on error
 func TestBatchSplit5(t *testing.T) {
-	_, err := BatchSplit(batchSplitData, len(batchSplitData) + 1)
+	_, err := BatchSplit(batchSplitData, len(batchSplitData)+1)
 
 	if err == nil {
 		t.Errorf("Batch split err is not nil")
@@ -65,9 +65,9 @@ func TestBatchSplit5(t *testing.T) {
 // ReverseMap
 //
 func TestReverseMap(t *testing.T) {
-	data := map[string]string {"key1" : "value1"}
+	data := map[string]string{"key1": "value1"}
 	res := ReverseMap(data)
-	expected := map[string]string {"value1" : "key1"}
+	expected := map[string]string{"value1": "key1"}
 
 	assertEqual(t, res, expected)
 }
@@ -145,7 +145,7 @@ func testReadFileInLoop(t *testing.T, fileName string, count int) {
 		log.Fatalf("Can not create file, err %v", err.Error())
 	}
 
-	readErr := ReadFileInLoop(fileName,count)
+	readErr := ReadFileInLoop(fileName, count)
 	assert.Equal(t, readErr, nil)
 
 	removeErr := os.Remove(fileName)

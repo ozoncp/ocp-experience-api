@@ -18,7 +18,7 @@ var _ = Describe("Flusher", func() {
 	var (
 		flusherImpl flusher.Flusher
 		mockRepo    *mocks.MockRepo
-		mockCtrl *gomock.Controller
+		mockCtrl    *gomock.Controller
 	)
 
 	BeforeEach(func() {
