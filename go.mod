@@ -8,3 +8,7 @@ require (
 	github.com/onsi/gomega v1.14.0 // indirect
 	github.com/stretchr/testify v1.7.0 // indirect
 )
+
+replace (
+	github.com/ozoncp/ocp-request-api/pkg/ocp-experience-api => ./pkg/ocp-experience-api
+)
