@@ -1,0 +1,278 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "api/ocp-experience-api/ocp-experience-api.proto",
+    "version": "version not set"
+  },
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/experiences": {
+      "get": {
+        "summary": "ListExperienceV1 returns a list of experiences",
+        "operationId": "OcpExperienceApi_ListExperienceV1",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiListExperienceV1Response"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          }
+        ],
+        "tags": [
+          "OcpExperienceApi"
+        ]
+      },
+      "post": {
+        "summary": "CreateExperienceV1 creates new experience. Returns created object id",
+        "operationId": "OcpExperienceApi_CreateExperienceV1",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiCreateExperienceV1Response"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiCreateExperienceV1Request"
+            }
+          }
+        ],
+        "tags": [
+          "OcpExperienceApi"
+        ]
+      }
+    },
+    "/v1/experiences/{id}": {
+      "get": {
+        "summary": "DescribeExperienceV1 returns detailed information of an experience",
+        "operationId": "OcpExperienceApi_DescribeExperienceV1",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiDescribeExperienceV1Response"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uint64"
+          }
+        ],
+        "tags": [
+          "OcpExperienceApi"
+        ]
+      },
+      "delete": {
+        "summary": "RemoveExperienceV1 removes experience by id. Returns a removing result",
+        "operationId": "OcpExperienceApi_RemoveExperienceV1",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiRemoveExperienceV1Response"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uint64"
+          }
+        ],
+        "tags": [
+          "OcpExperienceApi"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "apiCreateExperienceV1Request": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "type": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "to": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "level": {
+          "type": "string",
+          "format": "uint64"
+        }
+      },
+      "title": "Contains new experience data"
+    },
+    "apiCreateExperienceV1Response": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        }
+      },
+      "description": "Contains created Experience id."
+    },
+    "apiDescribeExperienceV1Response": {
+      "type": "object",
+      "properties": {
+        "experience": {
+          "$ref": "#/definitions/apiExperience"
+        }
+      },
+      "title": "Contains experience info"
+    },
+    "apiExperience": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "user_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "type": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "to": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "level": {
+          "type": "string",
+          "format": "uint64"
+        }
+      },
+      "title": "main entity"
+    },
+    "apiListExperienceV1Response": {
+      "type": "object",
+      "properties": {
+        "experiences": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiExperience"
+          }
+        }
+      },
+      "title": "Contains an experience list"
+    },
+    "apiRemoveExperienceV1Response": {
+      "type": "object",
+      "properties": {
+        "removed": {
+          "type": "boolean"
+        }
+      },
+      "title": "Remove result"
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "type_url": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "runtimeError": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string"
+        },
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}
