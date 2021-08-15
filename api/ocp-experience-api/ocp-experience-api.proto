@@ -6,7 +6,7 @@ import "github.com/envoyproxy/protoc-gen-validate/validate/validate.proto";
 
 package ocp.task.api;
 
-option go_package = "github.com/ozoncp/ocp-experience-api/pkg/ocp-experience-api;ocp-experience-api";
+option go_package = "github.com/ozoncp/ocp-experience-api/pkg/ocp-experience-api;ocp_experience_api";
 
 // CRUD service to manipulate experience
 service OcpExperienceApi {
@@ -20,7 +20,7 @@ service OcpExperienceApi {
   // DescribeExperienceV1 returns detailed information of an experience
   rpc DescribeExperienceV1(DescribeExperienceV1Request) returns (DescribeExperienceV1Response) {
     option (google.api.http) = {
-      get: "/v1/experiences/{experience_id}"
+      get: "/v1/experiences/{id}"
     };
   }
 
@@ -35,7 +35,7 @@ service OcpExperienceApi {
   // RemoveExperienceV1 removes experience by id. Returns a removing result
   rpc RemoveExperienceV1(RemoveExperienceV1Request) returns (RemoveExperienceV1Response) {
     option (google.api.http) = {
-      delete: "/v1/experiences/{experience_id}"
+      delete: "/v1/experiences/{id}"
     };
   }
 }
