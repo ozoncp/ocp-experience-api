@@ -1,0 +1,96 @@
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "github.com/envoyproxy/protoc-gen-validate/validate/validate.proto";
+
+package ocp.task.api;
+
+option go_package = "github.com/ozoncp/ocp-experience-api/pkg/ocp-experience-api;ocp_experience_api";
+
+// CRUD service to manipulate experience
+service OcpExperienceApi {
+  // ListExperienceV1 returns a list of experiences
+  rpc ListExperienceV1(ListExperienceV1Request) returns (ListExperienceV1Response) {
+    option (google.api.http) = {
+      get: "/v1/experiences"
+    };
+  }
+
+  // DescribeExperienceV1 returns detailed information of an experience
+  rpc DescribeExperienceV1(DescribeExperienceV1Request) returns (DescribeExperienceV1Response) {
+    option (google.api.http) = {
+      get: "/v1/experiences/{id}"
+    };
+  }
+
+  // CreateExperienceV1 creates new experience. Returns created object id
+  rpc CreateExperienceV1(CreateExperienceV1Request) returns (CreateExperienceV1Response) {
+    option (google.api.http) = {
+      post: "/v1/experiences"
+      body: "*"
+    };
+  }
+
+  // RemoveExperienceV1 removes experience by id. Returns a removing result
+  rpc RemoveExperienceV1(RemoveExperienceV1Request) returns (RemoveExperienceV1Response) {
+    option (google.api.http) = {
+      delete: "/v1/experiences/{id}"
+    };
+  }
+}
+
+// ListExperienceV1Request defines a size and offset of experience list
+message ListExperienceV1Request {
+  uint64 limit = 1 [(validate.rules).uint64 = {gt: 0, lte: 10000}];
+  uint64 offset = 2 [(validate.rules).uint64.gte = 0];
+}
+
+// Contains an experience list
+message ListExperienceV1Response {
+  repeated Experience experiences = 1;
+}
+
+// Contains new experience data
+message CreateExperienceV1Request {
+  uint64 user_id = 1 [(validate.rules).uint64.gt = 0];
+  uint64 type = 2;
+  google.protobuf.Timestamp from = 3;
+  google.protobuf.Timestamp to = 4;
+  uint64 level = 5;
+}
+
+// Contains created Experience id.
+message CreateExperienceV1Response {
+  uint64 id = 1;
+}
+
+// Experience id to delete
+message RemoveExperienceV1Request {
+  uint64 id = 1 [(validate.rules).uint64.gt = 0];
+}
+
+// Remove result
+message RemoveExperienceV1Response {
+  bool removed = 1;
+}
+
+// Experience id to get response
+message DescribeExperienceV1Request {
+  uint64 id = 1 [(validate.rules).uint64.gt = 0];
+}
+
+// Contains experience info
+message DescribeExperienceV1Response {
+  Experience experience = 1;
+}
+
+// main entity
+message Experience {
+  uint64 id = 1;
+  uint64 user_id = 2;
+  uint64 type = 3;
+  google.protobuf.Timestamp from = 4;
+  google.protobuf.Timestamp to = 5;
+  uint64 level = 6;
+}
