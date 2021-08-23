@@ -1,6 +1,7 @@
 package saver
 
 import (
+	"context"
 	"log"
 	"time"
 
@@ -123,7 +124,8 @@ func (s *saver) setState(state saverStates) {
 
 // flush flushes Experiences to flusher
 func (s *saver) flush() {
-	remains, err := s.flusher.Flush(s.entities)
+	ctx := context.Background()
+	remains, err := s.flusher.Flush(ctx, s.entities)
 
 	if err != nil {
 		log.Printf("Failed to save %v experience entities: %v", len(remains), err)

@@ -5,11 +5,16 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
+
+	"github.com/ozoncp/ocp-experience-api/internal/db"
+	"github.com/ozoncp/ocp-experience-api/internal/repo"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/ozoncp/ocp-experience-api/internal/api"
 	"google.golang.org/grpc"
 
+	sql "github.com/jmoiron/sqlx"
 	desc "github.com/ozoncp/ocp-experience-api/pkg/ocp-experience-api"
 )
 
@@ -18,14 +23,25 @@ const (
 	grpcServerEndpoint = "localhost:82"
 )
 
-func run() error {
+func mustGetEnvVar(name string) string {
+	envVal := os.Getenv(name)
+
+	if envVal == "" {
+		panic(name + "is not set")
+	}
+
+	return envVal
+}
+
+func run(database *sql.DB) error {
 	listen, err := net.Listen("tcp", grpcPort)
+
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
 	server := grpc.NewServer()
-	desc.RegisterOcpExperienceApiServer(server, api.NewExperienceApi())
+	desc.RegisterOcpExperienceApiServer(server, api.NewExperienceApi(repo.NewRepo(database)))
 
 	serverErr := server.Serve(listen)
 
@@ -58,8 +74,12 @@ func runJSON() {
 }
 
 func main() {
+	dsn := mustGetEnvVar("OCP_EXPERIENCE_DSN")
+	database := db.Connect(dsn)
+	defer database.Close()
+
 	go runJSON()
-	err := run()
+	err := run(database)
 
 	if err != nil {
 		log.Fatal(err)

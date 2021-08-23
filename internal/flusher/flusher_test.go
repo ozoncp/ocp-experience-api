@@ -1,6 +1,7 @@
 package flusher_test
 
 import (
+	"context"
 	"errors"
 	"time"
 
@@ -19,9 +20,11 @@ var _ = Describe("Flusher", func() {
 		flusherImpl flusher.Flusher
 		mockRepo    *mocks.MockRepo
 		mockCtrl    *gomock.Controller
+		ctx			context.Context
 	)
 
 	BeforeEach(func() {
+		ctx = context.Background()
 		mockCtrl = gomock.NewController(GinkgoT())
 		mockRepo = mocks.NewMockRepo(mockCtrl)
 	})
@@ -37,12 +40,12 @@ var _ = Describe("Flusher", func() {
 
 		It("Added all bulks, one call to repo. No remains left.", func() {
 			mockRepo.EXPECT().
-				Add(gomock.Any()).
+				AddExperiences(ctx, gomock.Any()).
 				Return(nil).
 				MaxTimes(1).
 				MinTimes(1)
 
-			remains, err := flusherImpl.Flush([]models.Experience{
+			remains, err := flusherImpl.Flush(ctx, []models.Experience{
 				models.NewExperience(1, 1, 1, time.Time{}, time.Time{}, 1),
 				models.NewExperience(2, 2, 2, time.Time{}, time.Time{}, 2),
 			})
@@ -53,12 +56,12 @@ var _ = Describe("Flusher", func() {
 
 		It("Added all bulks, two calls against repo. No remains left.", func() {
 			mockRepo.EXPECT().
-				Add(gomock.Any()).
+				AddExperiences(ctx, gomock.Any()).
 				Return(nil).
 				MaxTimes(2).
 				MinTimes(2)
 
-			remains, err := flusherImpl.Flush([]models.Experience{
+			remains, err := flusherImpl.Flush(ctx, []models.Experience{
 				models.NewExperience(1, 1, 1, time.Time{}, time.Time{}, 1),
 				models.NewExperience(2, 2, 2, time.Time{}, time.Time{}, 2),
 				models.NewExperience(3, 3, 3, time.Time{}, time.Time{}, 3),
@@ -71,12 +74,12 @@ var _ = Describe("Flusher", func() {
 
 		It("Added all bulks, two calls against repo. 1 item remained.", func() {
 			mockRepo.EXPECT().
-				Add(gomock.Any()).
+				AddExperiences(ctx, gomock.Any()).
 				Return(nil).
 				MaxTimes(2).
 				MinTimes(2)
 
-			remains, err := flusherImpl.Flush([]models.Experience{
+			remains, err := flusherImpl.Flush(ctx, []models.Experience{
 				models.NewExperience(1, 1, 1, time.Time{}, time.Time{}, 1),
 				models.NewExperience(2, 2, 2, time.Time{}, time.Time{}, 2),
 				models.NewExperience(3, 3, 3, time.Time{}, time.Time{}, 3),
@@ -97,7 +100,7 @@ var _ = Describe("Flusher", func() {
 
 		It("Failed to add all items", func() {
 			mockRepo.EXPECT().
-				Add(gomock.Any()).
+				AddExperiences(ctx, gomock.Any()).
 				Return(errors.New("failed to add")).
 				MaxTimes(1).
 				MinTimes(1)
@@ -107,7 +110,7 @@ var _ = Describe("Flusher", func() {
 				models.NewExperience(2, 2, 2, time.Time{}, time.Time{}, 2),
 			}
 
-			remains, err := flusherImpl.Flush(requests)
+			remains, err := flusherImpl.Flush(ctx, requests)
 
 			Expect(remains).To(Equal(requests))
 			Expect(err).To(HaveOccurred())
@@ -115,15 +118,15 @@ var _ = Describe("Flusher", func() {
 
 		It("Partially failed to add items", func() {
 			successFullCall1 := mockRepo.EXPECT().
-				Add(gomock.Any()).
+				AddExperiences(ctx, gomock.Any()).
 				Return(nil)
 
 			successFullCall2 := mockRepo.EXPECT().
-				Add(gomock.Any()).
+				AddExperiences(ctx, gomock.Any()).
 				Return(nil)
 
 			failedCall := mockRepo.EXPECT().
-				Add(gomock.Any()).
+				AddExperiences(ctx, gomock.Any()).
 				Return(errors.New("failed to add"))
 
 			gomock.InOrder(successFullCall1, successFullCall2, failedCall)
@@ -138,7 +141,7 @@ var _ = Describe("Flusher", func() {
 				models.NewExperience(7, 7, 7, time.Time{}, time.Time{}, 7),
 			}
 
-			remains, err := flusherImpl.Flush(requests)
+			remains, err := flusherImpl.Flush(ctx, requests)
 
 			Expect(remains).To(Equal([]models.Experience{
 				models.NewExperience(5, 5, 5, time.Time{}, time.Time{}, 5),
@@ -148,6 +151,5 @@ var _ = Describe("Flusher", func() {
 
 			Expect(err).To(HaveOccurred())
 		})
-
 	})
 })

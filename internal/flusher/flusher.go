@@ -1,6 +1,8 @@
 package flusher
 
 import (
+	"context"
+
 	"github.com/ozoncp/ocp-experience-api/internal/models"
 	"github.com/ozoncp/ocp-experience-api/internal/repo"
 	"github.com/ozoncp/ocp-experience-api/internal/utils"
@@ -8,7 +10,7 @@ import (
 
 // Flusher adds experience items to a storage
 type Flusher interface {
-	Flush(entities []models.Experience) ([]models.Experience, error)
+	Flush(ctx context.Context, entities []models.Experience) ([]models.Experience, error)
 }
 
 // NewFlusher creates a new Flusher instance that writes experience to storage
@@ -26,7 +28,7 @@ type flusher struct {
 
 // Flush stores a slice of Experiences into the Repo. It makes experiences by bulks of a certain size.
 // May returns some remains items with an error
-func (f *flusher) Flush(experiences []models.Experience) ([]models.Experience, error) {
+func (f *flusher) Flush(ctx context.Context, experiences []models.Experience) ([]models.Experience, error) {
 	remains := make([]models.Experience, 0, f.chunkSize)
 	bulks, err := utils.SplitExperienceToBulks(experiences, int(f.chunkSize))
 
@@ -40,7 +42,7 @@ func (f *flusher) Flush(experiences []models.Experience) ([]models.Experience, e
 			continue
 		}
 
-		addErr := f.requestRepo.Add(bulk)
+		addErr := f.requestRepo.AddExperiences(ctx, bulk)
 
 		if addErr != nil {
 			remains = append(remains, experiences[index*int(f.chunkSize):]...)

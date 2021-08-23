@@ -19,9 +19,16 @@ git clone https://github.com/ozoncp/ocp-experience-api.git
 cd ocp-experience-api
 make build
 ```
-Built binary exists at `bin/ocp-experience-api`
+Built binary exists at `bin/ocp-experience-api` <br />
+Create all tables - `make migrate` <br />
+Run service - `docker compose up` <br />
+Run tests - `make test` <br />
 
 ### To build and run with Docker
 
 - Build docker image `docker build . -t ocp-experience-api`
 - Run `docker run -p 82:82 ocp-experience-api`
+
+### Env variables
+
+- `OCP_EXPERIENCE_API` "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable"

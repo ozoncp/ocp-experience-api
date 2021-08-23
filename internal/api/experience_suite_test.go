@@ -1,4 +1,4 @@
-package saver
+package api_test
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	"github.com/onsi/gomega"
 )
 
-func TestSaver(t *testing.T) {
+func TestAPI(t *testing.T) {
 	gomega.RegisterFailHandler(ginkgo.Fail)
-	ginkgo.RunSpecs(t, "Saver Suite")
+	ginkgo.RunSpecs(t, "Api Suite")
 }
