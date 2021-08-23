@@ -61,7 +61,7 @@ var _ = Describe("Repo", func() {
 			returnRows := sqlmock.NewRows([]string{"id"}).AddRow(expectedNewId)
 
 			dbMock.ExpectPrepare(
-				"INSERT INTO experiences \\(user_id,type,from,to,level\\) VALUES \\(\\$1,\\$2,\\$3\\$4\\$5\\) RETURNING id",
+				"INSERT INTO experiences \\(user_id,type,from,to,level\\) VALUES \\(\\$1,\\$2,\\$3,\\$4,\\$5\\) RETURNING id",
 			).
 				ExpectQuery().
 				WithArgs(newExperience.UserId, newExperience.Type, newExperience.From, newExperience.To, newExperience.Level).
@@ -89,7 +89,7 @@ var _ = Describe("Repo", func() {
 			res := sqlmock.NewResult(3, 3)
 
 			dbMock.ExpectPrepare(
-				"INSERT INTO experiences \\(user_id,type,from,to,level\\) VALUES \\(\\$1,\\$2,\\$3\\$4\\$5\\),\\(\\$6,\\$7,\\$8\\$9\\$10\\),\\(\\$11,\\$12,\\$13\\$14\\$15\\)",
+				"INSERT INTO experiences \\(user_id,type,from,to,level\\) VALUES \\(\\$1,\\$2,\\$3,\\$4,\\$5\\),\\(\\$6,\\$7,\\$8,\\$9,\\$10\\),\\(\\$11,\\$12,\\$13,\\$14,\\$15\\)",
 			).
 				ExpectExec().
 				WithArgs(expectedQueryArgs...).
@@ -228,7 +228,7 @@ var _ = Describe("Repo", func() {
 			expectedError := errors.New("test error")
 
 			dbMock.ExpectPrepare(
-				"INSERT INTO experiences \\(user_id,type,from,to,level\\) VALUES \\(\\$1,\\$2,\\$3\\$4\\$5\\) RETURNING id",
+				"INSERT INTO experiences \\(user_id,type,from,to,level\\) VALUES \\(\\$1,\\$2,\\$3,\\$4,\\$5\\) RETURNING id",
 			).
 				ExpectQuery().
 				WithArgs(experience.UserId, experience.Type, experience.From, experience.To, experience.Level).
@@ -244,7 +244,7 @@ var _ = Describe("Repo", func() {
 			newReq := models.NewExperience(1, 1, 1, time.Time{}, time.Time{}, 1)
 			expectedError := errors.New("test error")
 			dbMock.ExpectPrepare(
-				"INSERT INTO experiences \\(user_id,type,from,to,level\\) VALUES \\(\\$1,\\$2,\\$3\\$4\\$5\\)",
+				"INSERT INTO experiences \\(user_id,type,from,to,level\\) VALUES \\(\\$1,\\$2,\\$3,\\$4,\\$5\\)",
 			).
 				ExpectExec().
 				WithArgs(newReq.UserId, newReq.Type, newReq.From, newReq.To, newReq.Level).

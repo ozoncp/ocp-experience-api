@@ -31,4 +31,4 @@ Run tests - `make test` <br />
 
 ### Env variables
 
-- `OCP_EXPERIENCE_API` "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable"
+- `OCP_EXPERIENCE_API` "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable" - defines connection to PostgresSQL
