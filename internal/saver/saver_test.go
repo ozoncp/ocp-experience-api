@@ -1,6 +1,7 @@
 package saver_test
 
 import (
+	"context"
 	"time"
 
 	"github.com/golang/mock/gomock"
@@ -30,9 +31,11 @@ var _ = Describe("Saver", func() {
 		mockFlusher *mocks.MockFlusher
 		mockCtrl    *gomock.Controller
 		entities    []models.Experience
+		ctx         context.Context
 	)
 
 	BeforeEach(func() {
+		ctx = context.Background()
 		mockCtrl = gomock.NewController(GinkgoT())
 		mockFlusher = mocks.NewMockFlusher(mockCtrl)
 	})
@@ -51,7 +54,7 @@ var _ = Describe("Saver", func() {
 			s.Init()
 			defer s.Close()
 
-			mockFlusher.EXPECT().Flush(gomock.Eq(entities)).Times(1).Return(nil, nil)
+			mockFlusher.EXPECT().Flush(ctx, gomock.Eq(entities)).Times(1).Return(nil, nil)
 
 			for _, e := range entities {
 				s.Save(e)
@@ -65,8 +68,8 @@ var _ = Describe("Saver", func() {
 			s.Init()
 			defer s.Close()
 
-			callFirst := mockFlusher.EXPECT().Flush(gomock.Eq(entities[:len(entities)/2])).Times(1).Return(nil, nil)
-			mockFlusher.EXPECT().Flush(gomock.Eq(entities[len(entities)/2:])).Times(1).Return(nil, nil).After(callFirst)
+			callFirst := mockFlusher.EXPECT().Flush(ctx, gomock.Eq(entities[:len(entities)/2])).Times(1).Return(nil, nil)
+			mockFlusher.EXPECT().Flush(ctx, gomock.Eq(entities[len(entities)/2:])).Times(1).Return(nil, nil).After(callFirst)
 
 			for _, e := range entities[:len(entities)/2] {
 				s.Save(e)
@@ -86,7 +89,7 @@ var _ = Describe("Saver", func() {
 			s.Init()
 			defer s.Close()
 
-			mockFlusher.EXPECT().Flush(gomock.Any()).Times(0)
+			mockFlusher.EXPECT().Flush(ctx, gomock.Any()).Times(0)
 
 			for _, e := range entities {
 				s.Save(e)

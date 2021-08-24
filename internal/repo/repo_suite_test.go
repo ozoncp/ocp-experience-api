@@ -1,4 +1,4 @@
-package saver
+package repo
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	"github.com/onsi/gomega"
 )
 
-func TestSaver(t *testing.T) {
+func TestRepo(t *testing.T) {
 	gomega.RegisterFailHandler(ginkgo.Fail)
-	ginkgo.RunSpecs(t, "Saver Suite")
+	ginkgo.RunSpecs(t, "Repo Suite")
 }

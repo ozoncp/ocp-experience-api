@@ -1,3 +1,11 @@
+ifeq ($(DB_DSN),)
+	DB_DSN := "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable"
+endif
+
+.PHONY: mockgen
+mockgen:
+		go generate internal/mocks/mockgen.go
+
 .PHONY: build
 build: vendor-proto .generate .build
 
@@ -60,3 +68,22 @@ install-go-deps: .install-go-deps
 		go install google.golang.org/grpc/cmd/protoc-gen-go-grpc
 		go install github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
 		go install github.com/envoyproxy/protoc-gen-validate
+
+.PHONY: migrate
+migrate: .install-migrate-deps .migrate
+
+.PHONY: .install-migrate-deps
+.install-migrate-deps:
+		go get -u github.com/pressly/goose/v3/cmd/goose
+
+.PHONY: .migrate
+.migrate:
+		goose -dir migrations postgres $(DB_DSN) up
+
+.PHONY: test
+test:
+		go test internal/flusher/* -v
+		go test internal/saver/* -v
+		go test internal/utils/* -v
+		go test internal/repo/* -v
+		go test internal/api/* -v
