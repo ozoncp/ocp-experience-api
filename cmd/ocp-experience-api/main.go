@@ -2,6 +2,11 @@ package main
 
 import (
 	"context"
+
+	"github.com/ozoncp/ocp-experience-api/internal/metrics"
+	"github.com/ozoncp/ocp-experience-api/internal/producer"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+
 	"net"
 	"net/http"
 	"strconv"
@@ -10,7 +15,6 @@ import (
 	"github.com/opentracing/opentracing-go"
 	"github.com/rs/zerolog/log"
 
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/uber/jaeger-client-go"
 
 	jaegerconfig "github.com/uber/jaeger-client-go/config"
@@ -26,7 +30,6 @@ import (
 
 	"google.golang.org/grpc"
 
-	sql "github.com/jmoiron/sqlx"
 	desc "github.com/ozoncp/ocp-experience-api/pkg/ocp-experience-api"
 )
 
@@ -35,7 +38,7 @@ const (
 )
 
 // creates kafka producer from config
-func createKafkaProducer(config *config.Configuration) prod.Producer {
+func createKafkaProducer(config *config.Configuration) producer.Producer {
 	brokers := config.KafkaEndpoint
 
 	cfg := sarama.NewConfig()
@@ -43,16 +46,16 @@ func createKafkaProducer(config *config.Configuration) prod.Producer {
 	cfg.Producer.RequiredAcks = sarama.WaitForAll
 	cfg.Producer.Return.Successes = true
 
-	producer, err := sarama.NewSyncProducer([]string { brokers }, cfg)
+	prod, err := sarama.NewSyncProducer([]string { brokers }, cfg)
 
 	if err != nil {
 		log.Panic().Msgf("failed to connect to Kafka brokers: %v", err)
 	}
 
-	return prod.NewProducer(apiKafkaTopic, producer)
+	return producer.NewProducer(apiKafkaTopic, prod)
 }
 
-//
+// inits opentracing
 func initTracing(config *config.Configuration) {
 	configuration := jaegerconfig.Configuration{
 		ServiceName: "ocp-experience-api",
@@ -81,31 +84,34 @@ func initTracing(config *config.Configuration) {
 	opentracing.SetGlobalTracer(tracer)
 }
 
+// builds experience API service
 func createExperienceApi(config *config.Configuration) *api.ExperienceAPI {
 	database := db.Connect(config.ExperienceDNS)
 
 	repo := repo.NewRepo(database)
-	prom := metrics.NewMetricsReporter()
+	prom := metrics.NewReporter()
 	producer := createKafkaProducer(config)
 	tracer := opentracing.GlobalTracer()
 
-	return api.NewRequestApi(repo, config.ExperienceBatchSize, prom, producer, tracer)
+	return api.NewExperienceApi(repo, config.ExperienceBatchSize, prom, producer, tracer)
 }
 
-func run(database *sql.DB, config *config.Configuration) error {
+func run(config *config.Configuration) error {
 	listen, err := net.Listen("tcp", ":" + strconv.FormatUint(config.GRPCPort, 10))
 
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		log.Panic().Msgf("failed to listen: %v", err)
 	}
 
 	server := grpc.NewServer()
-	desc.RegisterOcpExperienceApiServer(server, api.NewExperienceApi(repo.NewRepo(database)))
+	experienceApi := createExperienceApi(config)
+
+	desc.RegisterOcpExperienceApiServer(server, experienceApi)
 
 	serverErr := server.Serve(listen)
 
 	if serverErr != nil {
-		log.Fatalf("failed to serve: %v", serverErr)
+		log.Fatal().Msgf("failed to serve: %v", serverErr)
 	}
 
 	return nil
@@ -132,16 +138,26 @@ func runJSON(config *config.Configuration) {
 	}
 }
 
+// runs metrics
+func runMetrics() {
+	http.Handle("/metrics", promhttp.Handler())
+
+	if err := http.ListenAndServe(":9100", nil); err != nil {
+		log.Panic().Msgf("metrics endpoint failed: %v", err)
+	}
+}
+
 func main() {
 	config := config.GetConfiguration("config.json")
 
-	database := db.Connect(config.ExperienceDNS)
-	defer database.Close()
+	initTracing(config)
 
 	go runJSON(config)
-	err := run(database, config)
+	go runMetrics()
+
+	err := run(config)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Msgf("Error %e", err)
 	}
 }

@@ -15,10 +15,11 @@ var NotFound = errors.New("experience does not exist")
 // Repo is an experience storage interface
 type Repo interface {
 	Add(ctx context.Context, request models.Experience) (uint64, error)
-	AddExperiences(ctx context.Context, request []models.Experience) error
+	AddExperiences(ctx context.Context, request []models.Experience) ([]uint64, error)
 	List(ctx context.Context, limit, offset uint64) ([]models.Experience, error)
 	Describe(ctx context.Context, id uint64) (models.Experience, error)
 	Remove(ctx context.Context, id uint64) (bool, error)
+	Update(ctx context.Context, experience models.Experience) error
 }
 
 // NewRepo creates a new Repo
@@ -60,20 +61,29 @@ func (r *repo) Add(ctx context.Context, experience models.Experience) (uint64, e
 }
 
 // AddExperiences adds to db experience slice
-func (r *repo) AddExperiences(ctx context.Context, experiences []models.Experience) error {
-	query := r.builder.Insert("experiences").Columns("user_id", "type", "from", "to", "level")
+func (r *repo) AddExperiences(ctx context.Context, experiences []models.Experience) ([]uint64, error) {
+	query := r.builder.Insert("experiences").Columns("user_id", "type", "from", "to", "level").Suffix("RETURNING id")
 
 	for _, experience := range experiences {
 		query = query.Values(experience.UserId, experience.Type, experience.From, experience.To, experience.Level)
 	}
 
-	_, err := query.ExecContext(ctx)
+	rows, err := query.QueryContext(ctx)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	newIds := make([]uint64, 0, len(experiences))
+
+	for rows.Next() {
+		var id uint64 = 0
+		rows.Scan(&id)
+
+		newIds = append(newIds, id)
+	}
+
+	return newIds, nil
 }
 
 // List returns an experience list
@@ -148,4 +158,48 @@ func (r *repo) Remove(ctx context.Context, id uint64) (bool, error) {
 	}
 
 	return rowsDeleted > 0, err
+}
+
+// Update updates existing experience, returns NotFound error if request does not exist
+func (r *repo) Update(ctx context.Context, experience models.Experience) error {
+	query := r.builder.Update("experiences")
+
+	if experience.UserId != 0 {
+		query = query.Set("user_id", experience.UserId)
+	}
+
+	if experience.Type != 0 {
+		query = query.Set("type", experience.Type)
+	}
+
+	if !experience.From.IsZero() {
+		query = query.Set("from", experience.From)
+	}
+
+	if !experience.To.IsZero() {
+		query = query.Set("to", experience.To)
+	}
+
+	if experience.Level != 0 {
+		query = query.Set("level", experience.Level)
+	}
+
+	query = query.Where("id = ?", experience.Id)
+	ret, err := query.ExecContext(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	rowsUpdated, err := ret.RowsAffected()
+
+	if err != nil {
+		return err
+	}
+
+	if rowsUpdated == 0 {
+		return NotFound
+	}
+
+	return nil
 }

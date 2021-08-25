@@ -42,7 +42,7 @@ func (f *flusher) Flush(ctx context.Context, experiences []models.Experience) ([
 			continue
 		}
 
-		addErr := f.requestRepo.AddExperiences(ctx, bulk)
+		_, addErr := f.requestRepo.AddExperiences(ctx, bulk)
 
 		if addErr != nil {
 			remains = append(remains, experiences[index*int(f.chunkSize):]...)

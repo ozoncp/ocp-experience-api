@@ -41,7 +41,7 @@ var _ = Describe("Flusher", func() {
 		It("Added all bulks, one call to repo. No remains left.", func() {
 			mockRepo.EXPECT().
 				AddExperiences(ctx, gomock.Any()).
-				Return(nil).
+				Return([]uint64{}, nil).
 				MaxTimes(1).
 				MinTimes(1)
 
@@ -57,7 +57,7 @@ var _ = Describe("Flusher", func() {
 		It("Added all bulks, two calls against repo. No remains left.", func() {
 			mockRepo.EXPECT().
 				AddExperiences(ctx, gomock.Any()).
-				Return(nil).
+				Return([]uint64{}, nil).
 				MaxTimes(2).
 				MinTimes(2)
 
@@ -75,7 +75,7 @@ var _ = Describe("Flusher", func() {
 		It("Added all bulks, two calls against repo. 1 item remained.", func() {
 			mockRepo.EXPECT().
 				AddExperiences(ctx, gomock.Any()).
-				Return(nil).
+				Return([]uint64{}, nil).
 				MaxTimes(2).
 				MinTimes(2)
 
@@ -101,7 +101,7 @@ var _ = Describe("Flusher", func() {
 		It("Failed to add all items", func() {
 			mockRepo.EXPECT().
 				AddExperiences(ctx, gomock.Any()).
-				Return(errors.New("failed to add")).
+				Return([]uint64{}, errors.New("failed to add")).
 				MaxTimes(1).
 				MinTimes(1)
 
@@ -119,15 +119,15 @@ var _ = Describe("Flusher", func() {
 		It("Partially failed to add items", func() {
 			successFullCall1 := mockRepo.EXPECT().
 				AddExperiences(ctx, gomock.Any()).
-				Return(nil)
+				Return([]uint64{}, nil)
 
 			successFullCall2 := mockRepo.EXPECT().
 				AddExperiences(ctx, gomock.Any()).
-				Return(nil)
+				Return([]uint64{}, nil)
 
 			failedCall := mockRepo.EXPECT().
 				AddExperiences(ctx, gomock.Any()).
-				Return(errors.New("failed to add"))
+				Return([]uint64{}, errors.New("failed to add"))
 
 			gomock.InOrder(successFullCall1, successFullCall2, failedCall)
 

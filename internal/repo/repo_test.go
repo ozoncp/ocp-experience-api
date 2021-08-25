@@ -86,17 +86,22 @@ var _ = Describe("Repo", func() {
 				expectedQueryArgs = append(expectedQueryArgs, req.UserId, req.Type, req.From, req.To, req.Level)
 			}
 
-			res := sqlmock.NewResult(3, 3)
+			expectedIds := []uint64{1, 2, 3}
 
 			dbMock.ExpectPrepare(
-				"INSERT INTO experiences \\(user_id,type,from,to,level\\) VALUES \\(\\$1,\\$2,\\$3,\\$4,\\$5\\),\\(\\$6,\\$7,\\$8,\\$9,\\$10\\),\\(\\$11,\\$12,\\$13,\\$14,\\$15\\)",
+				"INSERT INTO experiences \\(user_id,type,from,to,level\\) VALUES \\(\\$1,\\$2,\\$3,\\$4,\\$5\\),\\(\\$6,\\$7,\\$8,\\$9,\\$10\\),\\(\\$11,\\$12,\\$13,\\$14,\\$15\\) RETURNING id",
 			).
-				ExpectExec().
+				ExpectQuery().
 				WithArgs(expectedQueryArgs...).
-				WillReturnResult(res)
+				WillReturnRows(sqlmock.NewRows([]string{"id"}).
+					AddRow(1).
+					AddRow(2).
+					AddRow(3))
 
-			err := rep.AddExperiences(ctx, experiences)
+			newIds, err := rep.AddExperiences(ctx, experiences)
+
 			Expect(err).ToNot(HaveOccurred())
+			Expect(newIds).To(Equal(expectedIds))
 		})
 
 		It("Fetch experiences from database", func() {
@@ -244,13 +249,13 @@ var _ = Describe("Repo", func() {
 			newReq := models.NewExperience(1, 1, 1, time.Time{}, time.Time{}, 1)
 			expectedError := errors.New("test error")
 			dbMock.ExpectPrepare(
-				"INSERT INTO experiences \\(user_id,type,from,to,level\\) VALUES \\(\\$1,\\$2,\\$3,\\$4,\\$5\\)",
+				"INSERT INTO experiences \\(user_id,type,from,to,level\\) VALUES \\(\\$1,\\$2,\\$3,\\$4,\\$5\\) RETURNING id",
 			).
-				ExpectExec().
+				ExpectQuery().
 				WithArgs(newReq.UserId, newReq.Type, newReq.From, newReq.To, newReq.Level).
 				WillReturnError(expectedError)
 
-			err := rep.AddExperiences(ctx, []models.Experience{newReq})
+			_, err := rep.AddExperiences(ctx, []models.Experience{newReq})
 			Expect(err).To(Equal(expectedError))
 		})
 
@@ -269,6 +274,36 @@ var _ = Describe("Repo", func() {
 
 			Expect(err).To(Equal(expectedError))
 			Expect(found).To(Equal(false))
+		})
+
+		It("Update experience that is exists", func() {
+			experience := models.NewExperience(1, 1, 1, time.Now(), time.Now(), 1)
+			res := sqlmock.NewResult(0, 1)
+
+			dbMock.ExpectPrepare(
+				"UPDATE experiences SET user_id = \\$1, type = \\$2, from = \\$3, to = \\$4, level = \\$5 WHERE id = \\$6",
+			).
+				ExpectExec().
+				WithArgs(experience.UserId, experience.Type, experience.From, experience.To, experience.Level, experience.Id).
+				WillReturnResult(res)
+
+			err := rep.Update(ctx, experience)
+			Expect(err).ToNot(Equal(NotFound))
+		})
+
+		It("Update experience that is not exists", func() {
+			experience := models.NewExperience(1, 1, 1, time.Now(), time.Now(), 1)
+			res := sqlmock.NewResult(0, 0)
+
+			dbMock.ExpectPrepare(
+				"UPDATE experiences SET user_id = \\$1, type = \\$2, from = \\$3, to = \\$4, level = \\$5 WHERE id = \\$6",
+			).
+				ExpectExec().
+				WithArgs(experience.UserId, experience.Type, experience.From, experience.To, experience.Level, experience.Id).
+				WillReturnResult(res)
+
+			err := rep.Update(ctx, experience)
+			Expect(err).To(Equal(NotFound))
 		})
 	})
 })
