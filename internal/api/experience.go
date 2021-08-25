@@ -266,7 +266,7 @@ func (r *ExperienceAPI) UpdateExperienceV1(ctx context.Context, req *desc.Update
 	}
 
 	r.producer.Send(producer.NewEvent(ctx, req.Id, producer.UpdateEvent, err))
-	r.metrics.IncUpdate(1, "UpdateRequestV1")
+	r.metrics.IncUpdate(1, "UpdateExperienceV1")
 
 	return &desc.UpdateExperienceV1Response{}, nil
 }
