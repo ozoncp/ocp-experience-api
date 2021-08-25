@@ -750,3 +750,401 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = ExperienceValidationError{}
+
+// Validate checks the field values on MultiCreateExperienceV1Request with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *MultiCreateExperienceV1Request) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	for idx, item := range m.GetExperiences() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return MultiCreateExperienceV1RequestValidationError{
+					field:  fmt.Sprintf("Experiences[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// MultiCreateExperienceV1RequestValidationError is the validation error
+// returned by MultiCreateExperienceV1Request.Validate if the designated
+// constraints aren't met.
+type MultiCreateExperienceV1RequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e MultiCreateExperienceV1RequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e MultiCreateExperienceV1RequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e MultiCreateExperienceV1RequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e MultiCreateExperienceV1RequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e MultiCreateExperienceV1RequestValidationError) ErrorName() string {
+	return "MultiCreateExperienceV1RequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e MultiCreateExperienceV1RequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sMultiCreateExperienceV1Request.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = MultiCreateExperienceV1RequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = MultiCreateExperienceV1RequestValidationError{}
+
+// Validate checks the field values on MultiCreateExperienceV1Response with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *MultiCreateExperienceV1Response) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	return nil
+}
+
+// MultiCreateExperienceV1ResponseValidationError is the validation error
+// returned by MultiCreateExperienceV1Response.Validate if the designated
+// constraints aren't met.
+type MultiCreateExperienceV1ResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e MultiCreateExperienceV1ResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e MultiCreateExperienceV1ResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e MultiCreateExperienceV1ResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e MultiCreateExperienceV1ResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e MultiCreateExperienceV1ResponseValidationError) ErrorName() string {
+	return "MultiCreateExperienceV1ResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e MultiCreateExperienceV1ResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sMultiCreateExperienceV1Response.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = MultiCreateExperienceV1ResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = MultiCreateExperienceV1ResponseValidationError{}
+
+// Validate checks the field values on UpdateExperienceV1Request with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *UpdateExperienceV1Request) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	if m.GetId() <= 0 {
+		return UpdateExperienceV1RequestValidationError{
+			field:  "Id",
+			reason: "value must be greater than 0",
+		}
+	}
+
+	if m.GetUserId() <= 0 {
+		return UpdateExperienceV1RequestValidationError{
+			field:  "UserId",
+			reason: "value must be greater than 0",
+		}
+	}
+
+	// no validation rules for Type
+
+	if v, ok := interface{}(m.GetFrom()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return UpdateExperienceV1RequestValidationError{
+				field:  "From",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if v, ok := interface{}(m.GetTo()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return UpdateExperienceV1RequestValidationError{
+				field:  "To",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	// no validation rules for Level
+
+	return nil
+}
+
+// UpdateExperienceV1RequestValidationError is the validation error returned by
+// UpdateExperienceV1Request.Validate if the designated constraints aren't met.
+type UpdateExperienceV1RequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdateExperienceV1RequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdateExperienceV1RequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdateExperienceV1RequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdateExperienceV1RequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdateExperienceV1RequestValidationError) ErrorName() string {
+	return "UpdateExperienceV1RequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpdateExperienceV1RequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdateExperienceV1Request.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdateExperienceV1RequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdateExperienceV1RequestValidationError{}
+
+// Validate checks the field values on UpdateExperienceV1Response with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *UpdateExperienceV1Response) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	return nil
+}
+
+// UpdateExperienceV1ResponseValidationError is the validation error returned
+// by UpdateExperienceV1Response.Validate if the designated constraints aren't met.
+type UpdateExperienceV1ResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdateExperienceV1ResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdateExperienceV1ResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdateExperienceV1ResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdateExperienceV1ResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdateExperienceV1ResponseValidationError) ErrorName() string {
+	return "UpdateExperienceV1ResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpdateExperienceV1ResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdateExperienceV1Response.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdateExperienceV1ResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdateExperienceV1ResponseValidationError{}
+
+// Validate checks the field values on ExperienceAPIEvent with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *ExperienceAPIEvent) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for Id
+
+	// no validation rules for Event
+
+	// no validation rules for Error
+
+	// no validation rules for TraceSpan
+
+	return nil
+}
+
+// ExperienceAPIEventValidationError is the validation error returned by
+// ExperienceAPIEvent.Validate if the designated constraints aren't met.
+type ExperienceAPIEventValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ExperienceAPIEventValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ExperienceAPIEventValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ExperienceAPIEventValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ExperienceAPIEventValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ExperienceAPIEventValidationError) ErrorName() string {
+	return "ExperienceAPIEventValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ExperienceAPIEventValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sExperienceAPIEvent.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ExperienceAPIEventValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ExperienceAPIEventValidationError{}

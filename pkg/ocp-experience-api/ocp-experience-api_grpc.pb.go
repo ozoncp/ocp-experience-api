@@ -26,6 +26,10 @@ type OcpExperienceApiClient interface {
 	CreateExperienceV1(ctx context.Context, in *CreateExperienceV1Request, opts ...grpc.CallOption) (*CreateExperienceV1Response, error)
 	// RemoveExperienceV1 removes experience by id. Returns a removing result
 	RemoveExperienceV1(ctx context.Context, in *RemoveExperienceV1Request, opts ...grpc.CallOption) (*RemoveExperienceV1Response, error)
+	// MultiCreateExperienceV1 creates multiple experiences, returns array of new ids
+	MultiCreateExperienceV1(ctx context.Context, in *MultiCreateExperienceV1Request, opts ...grpc.CallOption) (*MultiCreateExperienceV1Response, error)
+	// UpdateExperienceV1 updates experience data
+	UpdateExperienceV1(ctx context.Context, in *UpdateExperienceV1Request, opts ...grpc.CallOption) (*UpdateExperienceV1Response, error)
 }
 
 type ocpExperienceApiClient struct {
@@ -38,7 +42,7 @@ func NewOcpExperienceApiClient(cc grpc.ClientConnInterface) OcpExperienceApiClie
 
 func (c *ocpExperienceApiClient) ListExperienceV1(ctx context.Context, in *ListExperienceV1Request, opts ...grpc.CallOption) (*ListExperienceV1Response, error) {
 	out := new(ListExperienceV1Response)
-	err := c.cc.Invoke(ctx, "/ocp.task.api.OcpExperienceApi/ListExperienceV1", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ocp.experience.api.OcpExperienceApi/ListExperienceV1", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +51,7 @@ func (c *ocpExperienceApiClient) ListExperienceV1(ctx context.Context, in *ListE
 
 func (c *ocpExperienceApiClient) DescribeExperienceV1(ctx context.Context, in *DescribeExperienceV1Request, opts ...grpc.CallOption) (*DescribeExperienceV1Response, error) {
 	out := new(DescribeExperienceV1Response)
-	err := c.cc.Invoke(ctx, "/ocp.task.api.OcpExperienceApi/DescribeExperienceV1", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ocp.experience.api.OcpExperienceApi/DescribeExperienceV1", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +60,7 @@ func (c *ocpExperienceApiClient) DescribeExperienceV1(ctx context.Context, in *D
 
 func (c *ocpExperienceApiClient) CreateExperienceV1(ctx context.Context, in *CreateExperienceV1Request, opts ...grpc.CallOption) (*CreateExperienceV1Response, error) {
 	out := new(CreateExperienceV1Response)
-	err := c.cc.Invoke(ctx, "/ocp.task.api.OcpExperienceApi/CreateExperienceV1", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ocp.experience.api.OcpExperienceApi/CreateExperienceV1", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +69,25 @@ func (c *ocpExperienceApiClient) CreateExperienceV1(ctx context.Context, in *Cre
 
 func (c *ocpExperienceApiClient) RemoveExperienceV1(ctx context.Context, in *RemoveExperienceV1Request, opts ...grpc.CallOption) (*RemoveExperienceV1Response, error) {
 	out := new(RemoveExperienceV1Response)
-	err := c.cc.Invoke(ctx, "/ocp.task.api.OcpExperienceApi/RemoveExperienceV1", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ocp.experience.api.OcpExperienceApi/RemoveExperienceV1", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ocpExperienceApiClient) MultiCreateExperienceV1(ctx context.Context, in *MultiCreateExperienceV1Request, opts ...grpc.CallOption) (*MultiCreateExperienceV1Response, error) {
+	out := new(MultiCreateExperienceV1Response)
+	err := c.cc.Invoke(ctx, "/ocp.experience.api.OcpExperienceApi/MultiCreateExperienceV1", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ocpExperienceApiClient) UpdateExperienceV1(ctx context.Context, in *UpdateExperienceV1Request, opts ...grpc.CallOption) (*UpdateExperienceV1Response, error) {
+	out := new(UpdateExperienceV1Response)
+	err := c.cc.Invoke(ctx, "/ocp.experience.api.OcpExperienceApi/UpdateExperienceV1", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -84,6 +106,10 @@ type OcpExperienceApiServer interface {
 	CreateExperienceV1(context.Context, *CreateExperienceV1Request) (*CreateExperienceV1Response, error)
 	// RemoveExperienceV1 removes experience by id. Returns a removing result
 	RemoveExperienceV1(context.Context, *RemoveExperienceV1Request) (*RemoveExperienceV1Response, error)
+	// MultiCreateExperienceV1 creates multiple experiences, returns array of new ids
+	MultiCreateExperienceV1(context.Context, *MultiCreateExperienceV1Request) (*MultiCreateExperienceV1Response, error)
+	// UpdateExperienceV1 updates experience data
+	UpdateExperienceV1(context.Context, *UpdateExperienceV1Request) (*UpdateExperienceV1Response, error)
 	mustEmbedUnimplementedOcpExperienceApiServer()
 }
 
@@ -102,6 +128,12 @@ func (UnimplementedOcpExperienceApiServer) CreateExperienceV1(context.Context, *
 }
 func (UnimplementedOcpExperienceApiServer) RemoveExperienceV1(context.Context, *RemoveExperienceV1Request) (*RemoveExperienceV1Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveExperienceV1 not implemented")
+}
+func (UnimplementedOcpExperienceApiServer) MultiCreateExperienceV1(context.Context, *MultiCreateExperienceV1Request) (*MultiCreateExperienceV1Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MultiCreateExperienceV1 not implemented")
+}
+func (UnimplementedOcpExperienceApiServer) UpdateExperienceV1(context.Context, *UpdateExperienceV1Request) (*UpdateExperienceV1Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateExperienceV1 not implemented")
 }
 func (UnimplementedOcpExperienceApiServer) mustEmbedUnimplementedOcpExperienceApiServer() {}
 
@@ -126,7 +158,7 @@ func _OcpExperienceApi_ListExperienceV1_Handler(srv interface{}, ctx context.Con
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ocp.task.api.OcpExperienceApi/ListExperienceV1",
+		FullMethod: "/ocp.experience.api.OcpExperienceApi/ListExperienceV1",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(OcpExperienceApiServer).ListExperienceV1(ctx, req.(*ListExperienceV1Request))
@@ -144,7 +176,7 @@ func _OcpExperienceApi_DescribeExperienceV1_Handler(srv interface{}, ctx context
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ocp.task.api.OcpExperienceApi/DescribeExperienceV1",
+		FullMethod: "/ocp.experience.api.OcpExperienceApi/DescribeExperienceV1",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(OcpExperienceApiServer).DescribeExperienceV1(ctx, req.(*DescribeExperienceV1Request))
@@ -162,7 +194,7 @@ func _OcpExperienceApi_CreateExperienceV1_Handler(srv interface{}, ctx context.C
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ocp.task.api.OcpExperienceApi/CreateExperienceV1",
+		FullMethod: "/ocp.experience.api.OcpExperienceApi/CreateExperienceV1",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(OcpExperienceApiServer).CreateExperienceV1(ctx, req.(*CreateExperienceV1Request))
@@ -180,10 +212,46 @@ func _OcpExperienceApi_RemoveExperienceV1_Handler(srv interface{}, ctx context.C
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ocp.task.api.OcpExperienceApi/RemoveExperienceV1",
+		FullMethod: "/ocp.experience.api.OcpExperienceApi/RemoveExperienceV1",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(OcpExperienceApiServer).RemoveExperienceV1(ctx, req.(*RemoveExperienceV1Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _OcpExperienceApi_MultiCreateExperienceV1_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MultiCreateExperienceV1Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OcpExperienceApiServer).MultiCreateExperienceV1(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ocp.experience.api.OcpExperienceApi/MultiCreateExperienceV1",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OcpExperienceApiServer).MultiCreateExperienceV1(ctx, req.(*MultiCreateExperienceV1Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _OcpExperienceApi_UpdateExperienceV1_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateExperienceV1Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OcpExperienceApiServer).UpdateExperienceV1(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ocp.experience.api.OcpExperienceApi/UpdateExperienceV1",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OcpExperienceApiServer).UpdateExperienceV1(ctx, req.(*UpdateExperienceV1Request))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -192,7 +260,7 @@ func _OcpExperienceApi_RemoveExperienceV1_Handler(srv interface{}, ctx context.C
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var OcpExperienceApi_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "ocp.task.api.OcpExperienceApi",
+	ServiceName: "ocp.experience.api.OcpExperienceApi",
 	HandlerType: (*OcpExperienceApiServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -210,6 +278,14 @@ var OcpExperienceApi_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RemoveExperienceV1",
 			Handler:    _OcpExperienceApi_RemoveExperienceV1_Handler,
+		},
+		{
+			MethodName: "MultiCreateExperienceV1",
+			Handler:    _OcpExperienceApi_MultiCreateExperienceV1_Handler,
+		},
+		{
+			MethodName: "UpdateExperienceV1",
+			Handler:    _OcpExperienceApi_UpdateExperienceV1_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
