@@ -17,6 +17,7 @@ require (
 	github.com/onsi/gomega v1.14.0
 	github.com/rs/zerolog v1.23.0
 	github.com/stretchr/testify v1.7.0
+	github.com/tkanos/gonfig v0.0.0-20210106201359-53e13348de2f // indirect
 	golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d // indirect
 	golang.org/x/sys v0.0.0-20210809222454-d867a43fc93e // indirect
 	golang.org/x/text v0.3.7 // indirect

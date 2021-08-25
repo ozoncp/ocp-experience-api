@@ -29,6 +29,10 @@ Run tests - `make test` <br />
 - Build docker image `docker build . -t ocp-experience-api`
 - Run `docker run -p 82:82 ocp-experience-api`
 
-### Env variables
+### Configuration
+Use `config.json` to configure instance, params are follows
 
-- `OCP_EXPERIENCE_API` "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable" - defines connection to PostgresSQL
+- `ExperienceDNS`, by default is "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable" - defines connection to PostgresSQL
+- `GRPCPort`, by default is 82
+- `GRPCServerEndpoint`, by default is "localhost:82"
+- `HTTPServerEndpoint`, by default is "localhost:8082"

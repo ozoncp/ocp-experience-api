@@ -5,36 +5,23 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"os"
+	"strconv"
 
+	"github.com/ozoncp/ocp-experience-api/config"
+	"github.com/ozoncp/ocp-experience-api/internal/api"
 	"github.com/ozoncp/ocp-experience-api/internal/db"
 	"github.com/ozoncp/ocp-experience-api/internal/repo"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/ozoncp/ocp-experience-api/internal/api"
+
 	"google.golang.org/grpc"
 
 	sql "github.com/jmoiron/sqlx"
 	desc "github.com/ozoncp/ocp-experience-api/pkg/ocp-experience-api"
 )
 
-const (
-	grpcPort           = ":82"
-	grpcServerEndpoint = "localhost:82"
-)
-
-func mustGetEnvVar(name string) string {
-	envVal := os.Getenv(name)
-
-	if envVal == "" {
-		panic(name + "is not set")
-	}
-
-	return envVal
-}
-
-func run(database *sql.DB) error {
-	listen, err := net.Listen("tcp", grpcPort)
+func run(database *sql.DB, config *config.Configuration) error {
+	listen, err := net.Listen("tcp", ":" + strconv.FormatUint(config.GRPCPort, 10))
 
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
@@ -52,7 +39,7 @@ func run(database *sql.DB) error {
 	return nil
 }
 
-func runJSON() {
+func runJSON(config *config.Configuration) {
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -60,13 +47,13 @@ func runJSON() {
 	mux := runtime.NewServeMux()
 	opts := []grpc.DialOption{grpc.WithInsecure()}
 
-	err := desc.RegisterOcpExperienceApiHandlerFromEndpoint(ctx, mux, grpcServerEndpoint, opts)
+	err := desc.RegisterOcpExperienceApiHandlerFromEndpoint(ctx, mux, config.GRPCServerEndpoint, opts)
 
 	if err != nil {
 		panic(err)
 	}
 
-	err = http.ListenAndServe(":8082", mux)
+	err = http.ListenAndServe(config.HTTPServerEndpoint, mux)
 
 	if err != nil {
 		panic(err)
@@ -74,12 +61,13 @@ func runJSON() {
 }
 
 func main() {
-	dsn := mustGetEnvVar("OCP_EXPERIENCE_DSN")
-	database := db.Connect(dsn)
+	config := config.GetConfiguration("config.json")
+
+	database := db.Connect(config.ExperienceDNS)
 	defer database.Close()
 
-	go runJSON()
-	err := run(database)
+	go runJSON(config)
+	err := run(database, config)
 
 	if err != nil {
 		log.Fatal(err)
