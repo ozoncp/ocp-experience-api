@@ -5,9 +5,11 @@ Experience API. The service accepts gRPC connections at port 82 and HTTP at 8082
 Supports:
 
 - Create new experience
+- MultiCreate new experiences
 - Return experience information
 - Remove experience
 - Get experience list
+- Update experience
 
 ### To build locally
 
@@ -36,3 +38,6 @@ Use `config.json` to configure instance, params are follows
 - `GRPCPort`, by default is 82
 - `GRPCServerEndpoint`, by default is "localhost:82"
 - `HTTPServerEndpoint`, by default is "localhost:8082"
+- `ExperienceBatchSize`, by default is 1000
+- `KafkaEndpoint`, by default is "kafka:9094"
+- `JaegerEndpoint`, by default is "jaeger:6831"

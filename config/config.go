@@ -8,6 +8,10 @@ const (
 	grpcPort = 82
 	grpcServerEndpoint = "localhost:82"
 	httpServerEndpoint = "localhost:8082"
+
+	experienceBatchSize = 1000
+	kafkaEndpoint = "kafka:9094"
+	jaegerEndpoint = "jaeger:6831"
 )
 
 // Configuration describes app config
@@ -16,6 +20,9 @@ type Configuration struct {
 	GRPCPort uint64
 	GRPCServerEndpoint string
 	HTTPServerEndpoint string
+	ExperienceBatchSize uint64
+	KafkaEndpoint string
+	JaegerEndpoint string
 }
 
 // GetConfiguration reads config file and returns config as struct
@@ -37,4 +44,7 @@ func fillDefaultConfig(config *Configuration) {
 	config.GRPCPort = grpcPort
 	config.GRPCServerEndpoint = grpcServerEndpoint
 	config.HTTPServerEndpoint = httpServerEndpoint
+	config.ExperienceBatchSize = experienceBatchSize
+	config.KafkaEndpoint = kafkaEndpoint
+	config.JaegerEndpoint = jaegerEndpoint
 }

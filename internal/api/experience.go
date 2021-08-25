@@ -3,6 +3,9 @@ package api
 import (
 	"context"
 	"errors"
+
+	"github.com/opentracing/opentracing-go"
+
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -15,15 +18,20 @@ import (
 )
 
 // NewExperienceApi creates Experience API instance
-func NewExperienceApi(r repository.Repo) *ExperienceAPI {
+func NewExperienceApi(r repository.Repo, batchSize uint64) *ExperienceAPI {
 	return &ExperienceAPI{
 		repo: r,
+		batchSize: batchSize,
 	}
 }
 
 type ExperienceAPI struct {
 	desc.UnimplementedOcpExperienceApiServer
-	repo repository.Repo
+	repo      repository.Repo
+	batchSize uint64
+	metrics   metrics.MetricsReporter
+	producer  producer.Producer
+	tracer    opentracing.Tracer
 }
 
 // ListExperienceV1 returns a list of user Requests
