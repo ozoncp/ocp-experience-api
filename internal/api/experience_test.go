@@ -2,6 +2,8 @@ package api_test
 
 import (
 	"context"
+	"github.com/opentracing/opentracing-go"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"time"
 
 	"github.com/golang/mock/gomock"
@@ -22,15 +24,19 @@ import (
 
 var _ = Describe("Api", func() {
 	var (
-		experienceAPI *api.ExperienceAPI
-		mockRepo      *mocks.MockRepo
-		mockCtrl   *gomock.Controller
-		ctx        context.Context
+		experienceAPI 	*api.ExperienceAPI
+		mockRepo      	*mocks.MockRepo
+		mockCtrl   		*gomock.Controller
+		ctx        		context.Context
+		mockProm     	*mocks.MockReporter
+		mockProducer 	*mocks.MockProducer
 	)
 
 	BeforeEach(func() {
 		mockCtrl = gomock.NewController(GinkgoT())
 		mockRepo = mocks.NewMockRepo(mockCtrl)
+		mockProm = mocks.NewMockReporter(mockCtrl)
+		mockProducer = mocks.NewMockProducer(mockCtrl)
 		ctx = context.Background()
 	})
 
@@ -40,15 +46,29 @@ var _ = Describe("Api", func() {
 
 	Context("Add new item and return id", func() {
 		JustBeforeEach(func() {
-			experienceAPI = api.NewExperienceApi(mockRepo)
+			experienceAPI = api.NewExperienceApi(
+				mockRepo,
+				2,
+				mockProm,
+				mockProducer,
+				opentracing.NoopTracer{},
+			)
 			ctx = context.Background()
 		})
 
-		It("Add request with no error", func() {
+		It("Add with no error", func() {
 			id := uint64(11)
 			mockRepo.EXPECT().
-				Add(ctx, gomock.Any()).
+				Add(gomock.Any(), gomock.Any()).
 				Return(id, nil).
+				Times(1)
+
+			mockProm.EXPECT().
+				IncCreate(uint(1), "CreateExperienceV1").
+				Times(1)
+
+			mockProducer.EXPECT().
+				Send(gomock.Any()).
 				Times(1)
 
 			resp, err := experienceAPI.CreateExperienceV1(
@@ -69,7 +89,66 @@ var _ = Describe("Api", func() {
 			Expect(err).ToNot(HaveOccurred())
 		})
 
+		It("Add slice experience with no error", func() {
+			experiences := []models.Experience{
+				models.NewExperience(0, 1, 1, time.Time{}, time.Time{}, 1),
+				models.NewExperience(0, 2, 2, time.Time{}, time.Time{}, 2),
+				models.NewExperience(0, 3, 3, time.Time{}, time.Time{}, 3),
+			}
+
+			createExperienceV1Requests := make([]*desc.CreateExperienceV1Request, 0)
+
+			for _, r := range experiences {
+				createExperienceV1Requests = append(createExperienceV1Requests, &desc.CreateExperienceV1Request{
+					UserId: r.UserId,
+					Type:   r.Type,
+					From: 	timestamppb.New(r.From),
+					To: 	timestamppb.New(r.To),
+					Level: r.Level,
+				})
+			}
+
+			mockRepo.EXPECT().
+				AddExperiences(gomock.Any(), experiences[:2]).
+				Return([]uint64{1, 2}, nil).
+				Times(1)
+
+			mockRepo.EXPECT().
+				AddExperiences(gomock.Any(), experiences[2:]).
+				Return([]uint64{3}, nil).
+				Times(1)
+
+			mockProm.EXPECT().
+				IncCreate(uint(2), "MultiCreateExperienceV1").
+				Times(1)
+
+			mockProm.EXPECT().
+				IncCreate(uint(1), "MultiCreateExperienceV1").
+				Times(1)
+
+			mockProducer.EXPECT().
+				Send(gomock.Any()).
+				Times(3)
+
+			resp, err := experienceAPI.MultiCreateExperienceV1(
+				ctx, &desc.MultiCreateExperienceV1Request {
+					Experiences: createExperienceV1Requests,
+				},
+			)
+
+			Expect(resp).
+				To(Equal(&desc.MultiCreateExperienceV1Response{
+					Ids: []uint64{1, 2, 3},
+				}))
+
+			Expect(err).ToNot(HaveOccurred())
+		})
+
 		It("Add() params validation", func() {
+			mockProducer.EXPECT().
+				Send(gomock.Any()).
+				Times(1)
+
 			_, err := experienceAPI.CreateExperienceV1(
 				ctx, &desc.CreateExperienceV1Request{UserId: 0},
 			)
@@ -78,6 +157,10 @@ var _ = Describe("Api", func() {
 		})
 
 		It("Remove() params validation", func() {
+			mockProducer.EXPECT().
+				Send(gomock.Any()).
+				Times(1)
+
 			_, err := experienceAPI.RemoveExperienceV1(
 				ctx, &desc.RemoveExperienceV1Request{},
 			)
@@ -86,6 +169,10 @@ var _ = Describe("Api", func() {
 		})
 
 		It("Describe() params validation", func() {
+			mockProducer.EXPECT().
+				Send(gomock.Any()).
+				Times(1)
+
 			_, err := experienceAPI.DescribeExperienceV1(
 				ctx, &desc.DescribeExperienceV1Request{},
 			)
@@ -94,6 +181,10 @@ var _ = Describe("Api", func() {
 		})
 
 		It("List() params validation", func() {
+			mockProducer.EXPECT().
+				Send(gomock.Any()).
+				Times(2)
+
 			_, err := experienceAPI.ListExperienceV1(
 				ctx, &desc.ListExperienceV1Request{Limit: 0},
 			)
@@ -115,10 +206,18 @@ var _ = Describe("Api", func() {
 				models.NewExperience(3, 3, 3, time.Time{}, time.Time{}, 3),
 			}
 
+			mockProm.EXPECT().
+				IncList(uint(1), "ListExperienceV1").
+				Times(1)
+
 			mockRepo.EXPECT().
-				List(ctx, limit, offset).
+				List(gomock.Any(), limit, offset).
 				Return(requests, nil).
 				Times(1)
+
+			mockProducer.EXPECT().
+				Send(gomock.Any()).
+				Times(3)
 
 			resp, err := experienceAPI.ListExperienceV1(
 				ctx, &desc.ListExperienceV1Request{
@@ -142,9 +241,25 @@ var _ = Describe("Api", func() {
 
 		removeTest := func(expectFound bool) {
 			id := uint64(11)
-			mockRepo.EXPECT().
-				Remove(ctx, id).
-				Return(expectFound, nil).
+
+			if expectFound {
+				mockRepo.EXPECT().
+					Remove(gomock.Any(), id).
+					Return(true, nil).
+					Times(1)
+			} else {
+				mockRepo.EXPECT().
+					Remove(gomock.Any(), id).
+					Return(false, nil).
+					Times(1)
+			}
+
+			mockProm.EXPECT().
+				IncRemove(uint(1), "RemoveExperienceV1").
+				Times(1)
+
+			mockProducer.EXPECT().
+				Send(gomock.Any()).
 				Times(1)
 
 			resp, err := experienceAPI.RemoveExperienceV1(
@@ -153,13 +268,13 @@ var _ = Describe("Api", func() {
 				},
 			)
 
-			Expect(resp).
-				To(Equal(&desc.RemoveExperienceV1Response{
+			Expect(resp).To(Equal(&desc.RemoveExperienceV1Response{
 					Removed: expectFound,
 				}))
 
 			Expect(err).ToNot(HaveOccurred())
 		}
+
 
 		It("Remove existing experience with no errors", func() {
 			removeTest(true)
@@ -169,12 +284,50 @@ var _ = Describe("Api", func() {
 			removeTest(false)
 		})
 
+		It("Update existing experience", func() {
+			req := models.NewExperience(1, 1, 1, time.Time{}, time.Time{}, 1)
+			mockRepo.EXPECT().
+				Update(gomock.Any(), req).
+				Return(nil).
+				Times(1)
+
+			mockProm.EXPECT().
+				IncUpdate(uint(1), "UpdateExperienceV1").
+				Times(1)
+
+			mockProducer.EXPECT().
+				Send(gomock.Any()).
+				Times(1)
+
+			resp, err := experienceAPI.UpdateExperienceV1(
+				ctx, &desc.UpdateExperienceV1Request{
+					Id: req.Id,
+					UserId:    	req.UserId,
+					Type:      	req.Type,
+					From:      	timestamppb.New(req.From),
+					To: 		timestamppb.New(req.To),
+					Level: 		req.Level,
+				},
+			)
+
+			Expect(resp).To(Equal(&desc.UpdateExperienceV1Response{}))
+			Expect(err).ToNot(HaveOccurred())
+		})
+
 		It("Describe existing experience", func() {
 			experience := models.NewExperience(1, 1, 1, time.Time{}, time.Time{}, 1)
 
 			mockRepo.EXPECT().
-				Describe(ctx, experience.Id).
+				Describe(gomock.Any(), experience.Id).
 				Return(experience, nil).
+				Times(1)
+
+			mockProm.EXPECT().
+				IncRead(uint(1), "DescribeExperienceV1").
+				Times(1)
+
+			mockProducer.EXPECT().
+				Send(gomock.Any()).
 				Times(1)
 
 			resp, err := experienceAPI.DescribeExperienceV1(
@@ -194,7 +347,7 @@ var _ = Describe("Api", func() {
 		It("Describe no existing experience", func() {
 			id := uint64(11)
 			mockRepo.EXPECT().
-				Describe(ctx, id).
+				Describe(gomock.Any(), id).
 				Return(models.Experience{}, repo.NotFound).
 				Times(1)
 

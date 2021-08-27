@@ -4,7 +4,7 @@ import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
 import "github.com/envoyproxy/protoc-gen-validate/validate/validate.proto";
 
-package ocp.task.api;
+package ocp.experience.api;
 
 option go_package = "github.com/ozoncp/ocp-experience-api/pkg/ocp-experience-api;ocp_experience_api";
 
@@ -36,6 +36,22 @@ service OcpExperienceApi {
   rpc RemoveExperienceV1(RemoveExperienceV1Request) returns (RemoveExperienceV1Response) {
     option (google.api.http) = {
       delete: "/v1/experiences/{id}"
+    };
+  }
+
+  // MultiCreateExperienceV1 creates multiple experiences, returns array of new ids
+  rpc MultiCreateExperienceV1(MultiCreateExperienceV1Request) returns (MultiCreateExperienceV1Response) {
+    option (google.api.http) = {
+      post: "/v1/experiences/list"
+      body: "*"
+    };
+  }
+
+  // UpdateExperienceV1 updates experience data
+  rpc UpdateExperienceV1(UpdateExperienceV1Request) returns (UpdateExperienceV1Response) {
+    option (google.api.http) = {
+      put: "/v1/experiences/{id}"
+      body: "*"
     };
   }
 }
@@ -93,4 +109,44 @@ message Experience {
   google.protobuf.Timestamp from = 4;
   google.protobuf.Timestamp to = 5;
   uint64 level = 6;
+}
+
+// Contains a batch of new experiences
+message MultiCreateExperienceV1Request {
+  repeated CreateExperienceV1Request experiences = 1;
+}
+
+// Api returns created experience ids
+message MultiCreateExperienceV1Response {
+  repeated uint64 ids = 1;
+}
+
+// Updates experience info
+message UpdateExperienceV1Request {
+  uint64 id = 1 [(validate.rules).uint64.gt = 0];
+  uint64 user_id = 2 [(validate.rules).uint64.gt = 0];
+  uint64 type = 3;
+  google.protobuf.Timestamp from = 4;
+  google.protobuf.Timestamp to = 5;
+  uint64 level = 6;
+}
+
+// Update experience result
+message UpdateExperienceV1Response {
+}
+
+// The below below related to API events that would be sent via Kafka
+message ExperienceAPIEvent {
+  uint64 id = 1;
+
+  enum EventType {
+    CREATE = 0;
+    READ = 1;
+    UPDATE = 2;
+    DELETE = 3;
+  }
+
+  EventType event = 2;
+  string error = 3;
+  map<string, string> trace_span = 4;
 }

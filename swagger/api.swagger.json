@@ -81,6 +81,39 @@
         ]
       }
     },
+    "/v1/experiences/list": {
+      "post": {
+        "summary": "MultiCreateExperienceV1 creates multiple experiences, returns array of new ids",
+        "operationId": "OcpExperienceApi_MultiCreateExperienceV1",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiMultiCreateExperienceV1Response"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiMultiCreateExperienceV1Request"
+            }
+          }
+        ],
+        "tags": [
+          "OcpExperienceApi"
+        ]
+      }
+    },
     "/v1/experiences/{id}": {
       "get": {
         "summary": "DescribeExperienceV1 returns detailed information of an experience",
@@ -136,6 +169,44 @@
             "required": true,
             "type": "string",
             "format": "uint64"
+          }
+        ],
+        "tags": [
+          "OcpExperienceApi"
+        ]
+      },
+      "put": {
+        "summary": "UpdateExperienceV1 updates experience data",
+        "operationId": "OcpExperienceApi_UpdateExperienceV1",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiUpdateExperienceV1Response"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiUpdateExperienceV1Request"
+            }
           }
         ],
         "tags": [
@@ -232,6 +303,31 @@
       },
       "title": "Contains an experience list"
     },
+    "apiMultiCreateExperienceV1Request": {
+      "type": "object",
+      "properties": {
+        "experiences": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiCreateExperienceV1Request"
+          }
+        }
+      },
+      "title": "Contains a batch of new experiences"
+    },
+    "apiMultiCreateExperienceV1Response": {
+      "type": "object",
+      "properties": {
+        "ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uint64"
+          }
+        }
+      },
+      "title": "Api returns created experience ids"
+    },
     "apiRemoveExperienceV1Response": {
       "type": "object",
       "properties": {
@@ -240,6 +336,40 @@
         }
       },
       "title": "Remove result"
+    },
+    "apiUpdateExperienceV1Request": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "user_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "type": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "to": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "level": {
+          "type": "string",
+          "format": "uint64"
+        }
+      },
+      "title": "Updates experience info"
+    },
+    "apiUpdateExperienceV1Response": {
+      "type": "object",
+      "title": "Update experience result"
     },
     "protobufAny": {
       "type": "object",
