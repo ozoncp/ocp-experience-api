@@ -9,5 +9,5 @@ import (
 
 func TestRepo(t *testing.T) {
 	gomega.RegisterFailHandler(ginkgo.Fail)
-	ginkgo.RunSpecs(t, "Repo Suite")
+	ginkgo.RunSpecs(t, "IRepo Suite")
 }

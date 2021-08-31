@@ -19,10 +19,10 @@ import (
 	"github.com/ozoncp/ocp-experience-api/internal/models"
 )
 
-var _ = Describe("Repo", func() {
+var _ = Describe("IRepo", func() {
 	var (
-		rep      Repo
-		dbMock   sqlmock.Sqlmock
+		rep    IRepo
+		dbMock sqlmock.Sqlmock
 		mockCtrl *gomock.Controller
 		ctx      context.Context
 		db       *sql.DB
@@ -50,7 +50,7 @@ var _ = Describe("Repo", func() {
 			Expect(err).ToNot(HaveOccurred())
 
 			cache := sq.NewStmtCache(db)
-			rep = &repo{
+			rep = &Repo{
 				builder: sq.StatementBuilder.PlaceholderFormat(sq.Dollar).RunWith(cache),
 			}
 		})

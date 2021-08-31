@@ -10,7 +10,7 @@ type Producer interface {
 }
 
 // NewProducer creates new kafka producer
-func NewProducer(topic string, kafkaProducer sarama.SyncProducer) Producer {
+func NewProducer(topic string, kafkaProducer sarama.SyncProducer) *producer {
 	return &producer{topic: topic, kafkaProducer: kafkaProducer}
 }
 

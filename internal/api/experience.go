@@ -26,7 +26,7 @@ type validator interface {
 }
 
 // NewExperienceApi creates Experience API instance
-func NewExperienceApi(r repository.Repo,
+func NewExperienceApi(r repository.IRepo,
 	batchSize uint64,
 	reporter metrics.Reporter,
 	producer producer.Producer,
@@ -43,7 +43,7 @@ func NewExperienceApi(r repository.Repo,
 
 type ExperienceAPI struct {
 	desc.UnimplementedOcpExperienceApiServer
-	repo      repository.Repo
+	repo      repository.IRepo
 	batchSize uint64
 	metrics   metrics.Reporter
 	producer  producer.Producer
