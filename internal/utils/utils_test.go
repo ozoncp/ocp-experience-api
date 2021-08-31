@@ -133,7 +133,12 @@ func createTestLoopFile(fileName string) error {
 		}
 	}()
 
-	file.WriteString("TestInformation")
+	_, err = file.WriteString("TestInformation")
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

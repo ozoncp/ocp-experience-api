@@ -78,7 +78,11 @@ func (r *Repo) AddExperiences(ctx context.Context, experiences []models.Experien
 
 	for rows.Next() {
 		var id uint64 = 0
-		rows.Scan(&id)
+		scanErr := rows.Scan(&id)
+
+		if scanErr != nil {
+			return nil, scanErr
+		}
 
 		newIds = append(newIds, id)
 	}
