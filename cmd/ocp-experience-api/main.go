@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"go.uber.org/atomic"
+	"sync/atomic"
 
 	"github.com/ozoncp/ocp-experience-api/internal/metrics"
 	"github.com/ozoncp/ocp-experience-api/internal/producer"
@@ -35,7 +35,7 @@ import (
 	desc "github.com/ozoncp/ocp-experience-api/pkg/ocp-experience-api"
 )
 
-var isServiceReady atomic.Bool
+var isServiceReady atomic.Value
 
 const (
 	apiKafkaTopic = "ocp_experience_events"
@@ -197,9 +197,9 @@ func healthHandler(w http.ResponseWriter, _ *http.Request) {
 }
 
 // readyHandler is a Readiness probe
-func readyHandler(isReady *atomic.Bool) http.HandlerFunc {
+func readyHandler(isReady *atomic.Value) http.HandlerFunc {
 	return func(w http.ResponseWriter, _ *http.Request) {
-		if isReady == nil || !isReady.Load() {
+		if isReady == nil || !isReady.Load().(bool) {
 			http.Error(w, http.StatusText(http.StatusServiceUnavailable), http.StatusServiceUnavailable)
 			return
 		}
