@@ -12,8 +12,8 @@ import (
 
 var NotFound = errors.New("experience does not exist")
 
-// Repo is an experience storage interface
-type Repo interface {
+// IRepo is an experience storage interface
+type IRepo interface {
 	Add(ctx context.Context, request models.Experience) (uint64, error)
 	AddExperiences(ctx context.Context, request []models.Experience) ([]uint64, error)
 	List(ctx context.Context, limit, offset uint64) ([]models.Experience, error)
@@ -23,21 +23,21 @@ type Repo interface {
 }
 
 // NewRepo creates a new Repo
-func NewRepo(db *sql.DB) Repo {
+func NewRepo(db *sql.DB) *Repo {
 	cache := sq.NewStmtCache(db)
 
-	return &repo{
+	return &Repo{
 		builder: sq.StatementBuilder.PlaceholderFormat(sq.Dollar).RunWith(cache),
 	}
 }
 
-// Repo impl
-type repo struct {
+// Repo is IRepo impl
+type Repo struct {
 	builder sq.StatementBuilderType
 }
 
 // Add adds to db experience and returns its id
-func (r *repo) Add(ctx context.Context, experience models.Experience) (uint64, error) {
+func (r *Repo) Add(ctx context.Context, experience models.Experience) (uint64, error) {
 	query := r.builder.Insert("experiences").
 		Columns("user_id", "type", "from", "to", "level").
 		Suffix("RETURNING id").
@@ -61,7 +61,7 @@ func (r *repo) Add(ctx context.Context, experience models.Experience) (uint64, e
 }
 
 // AddExperiences adds to db experience slice
-func (r *repo) AddExperiences(ctx context.Context, experiences []models.Experience) ([]uint64, error) {
+func (r *Repo) AddExperiences(ctx context.Context, experiences []models.Experience) ([]uint64, error) {
 	query := r.builder.Insert("experiences").Columns("user_id", "type", "from", "to", "level").Suffix("RETURNING id")
 
 	for _, experience := range experiences {
@@ -78,7 +78,11 @@ func (r *repo) AddExperiences(ctx context.Context, experiences []models.Experien
 
 	for rows.Next() {
 		var id uint64 = 0
-		rows.Scan(&id)
+		scanErr := rows.Scan(&id)
+
+		if scanErr != nil {
+			return nil, scanErr
+		}
 
 		newIds = append(newIds, id)
 	}
@@ -87,7 +91,7 @@ func (r *repo) AddExperiences(ctx context.Context, experiences []models.Experien
 }
 
 // List returns an experience list
-func (r *repo) List(ctx context.Context, limit, offset uint64) ([]models.Experience, error) {
+func (r *Repo) List(ctx context.Context, limit, offset uint64) ([]models.Experience, error) {
 	query := r.builder.Select("id, user_id, type, from, to, level").
 		From("experiences").
 		Offset(offset).
@@ -116,7 +120,7 @@ func (r *repo) List(ctx context.Context, limit, offset uint64) ([]models.Experie
 }
 
 // Describe returns experience by id
-func (r *repo) Describe(ctx context.Context, id uint64) (models.Experience, error) {
+func (r *Repo) Describe(ctx context.Context, id uint64) (models.Experience, error) {
 	query := r.builder.Select("id, user_id, type, from, to, level").
 		From("experiences").
 		Where("id = ?", id)
@@ -143,7 +147,7 @@ func (r *repo) Describe(ctx context.Context, id uint64) (models.Experience, erro
 }
 
 // Remove deletes experience by id
-func (r *repo) Remove(ctx context.Context, id uint64) (bool, error) {
+func (r *Repo) Remove(ctx context.Context, id uint64) (bool, error) {
 	query := r.builder.Delete("experiences").Where("id = ?", id)
 	ret, err := query.ExecContext(ctx)
 
@@ -161,7 +165,7 @@ func (r *repo) Remove(ctx context.Context, id uint64) (bool, error) {
 }
 
 // Update updates existing experience, returns NotFound error if request does not exist
-func (r *repo) Update(ctx context.Context, experience models.Experience) error {
+func (r *Repo) Update(ctx context.Context, experience models.Experience) error {
 	query := r.builder.Update("experiences")
 
 	if experience.UserId != 0 {

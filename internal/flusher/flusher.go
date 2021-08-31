@@ -14,7 +14,7 @@ type Flusher interface {
 }
 
 // NewFlusher creates a new Flusher instance that writes experience to storage
-func NewFlusher(chunkSize uint, requestRepo repo.Repo) Flusher {
+func NewFlusher(chunkSize uint, requestRepo repo.IRepo) *flusher {
 	return &flusher{
 		chunkSize:   chunkSize,
 		requestRepo: requestRepo,
@@ -23,10 +23,10 @@ func NewFlusher(chunkSize uint, requestRepo repo.Repo) Flusher {
 
 type flusher struct {
 	chunkSize   uint
-	requestRepo repo.Repo
+	requestRepo repo.IRepo
 }
 
-// Flush stores a slice of Experiences into the Repo. It makes experiences by bulks of a certain size.
+// Flush stores a slice of Experiences into the IRepo. It makes experiences by bulks of a certain size.
 // May returns some remains items with an error
 func (f *flusher) Flush(ctx context.Context, experiences []models.Experience) ([]models.Experience, error) {
 	remains := make([]models.Experience, 0, f.chunkSize)

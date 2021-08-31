@@ -133,7 +133,12 @@ func createTestLoopFile(fileName string) error {
 		}
 	}()
 
-	file.WriteString("TestInformation")
+	_, err = file.WriteString("TestInformation")
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -142,7 +147,8 @@ func testReadFileInLoop(t *testing.T, fileName string, count int) {
 	err := createTestLoopFile(fileName)
 
 	if err != nil {
-		log.Fatalf("Can not create file, err %v", err.Error())
+		log.Printf("Can not create file, err %v", err.Error())
+		return
 	}
 
 	readErr := ReadFileInLoop(fileName, count)

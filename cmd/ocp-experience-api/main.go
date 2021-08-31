@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"encoding/json"
+	"sync/atomic"
 
 	"github.com/ozoncp/ocp-experience-api/internal/metrics"
 	"github.com/ozoncp/ocp-experience-api/internal/producer"
@@ -17,9 +19,9 @@ import (
 
 	"github.com/uber/jaeger-client-go"
 
-	jaegerconfig "github.com/uber/jaeger-client-go/config"
-	jaegerlog "github.com/uber/jaeger-client-go/log"
-	jaegermetrics "github.com/uber/jaeger-lib/metrics"
+	jaegerConfig "github.com/uber/jaeger-client-go/config"
+	jaegerLog "github.com/uber/jaeger-client-go/log"
+	jaegerMetrics "github.com/uber/jaeger-lib/metrics"
 
 	"github.com/ozoncp/ocp-experience-api/config"
 	"github.com/ozoncp/ocp-experience-api/internal/api"
@@ -32,6 +34,8 @@ import (
 
 	desc "github.com/ozoncp/ocp-experience-api/pkg/ocp-experience-api"
 )
+
+var isServiceReady atomic.Value
 
 const (
 	apiKafkaTopic = "ocp_experience_events"
@@ -57,24 +61,24 @@ func createKafkaProducer(config *config.Configuration) producer.Producer {
 
 // inits opentracing
 func initTracing(config *config.Configuration) {
-	configuration := jaegerconfig.Configuration{
+	configuration := jaegerConfig.Configuration{
 		ServiceName: "ocp-experience-api",
-		Sampler: &jaegerconfig.SamplerConfig{
+		Sampler: &jaegerConfig.SamplerConfig{
 			Type:  jaeger.SamplerTypeConst,
 			Param: 1,
 		},
-		Reporter: &jaegerconfig.ReporterConfig{
+		Reporter: &jaegerConfig.ReporterConfig{
 			LocalAgentHostPort: config.JaegerEndpoint,
 			LogSpans:           true,
 		},
 	}
 
-	jLogger := jaegerlog.StdLogger
-	jMetricsFactory := jaegermetrics.NullFactory
+	jLogger := jaegerLog.StdLogger
+	jMetricsFactory := jaegerMetrics.NullFactory
 
 	tracer, _, err := configuration.NewTracer(
-		jaegerconfig.Logger(jLogger),
-		jaegerconfig.Metrics(jMetricsFactory),
+		jaegerConfig.Logger(jLogger),
+		jaegerConfig.Metrics(jMetricsFactory),
 	)
 
 	if err != nil {
@@ -108,10 +112,12 @@ func run(config *config.Configuration) error {
 
 	desc.RegisterOcpExperienceApiServer(server, experienceApi)
 
+	isServiceReady.Store(true)
 	serverErr := server.Serve(listen)
 
 	if serverErr != nil {
 		log.Fatal().Msgf("failed to serve: %v", serverErr)
+		return serverErr
 	}
 
 	return nil
@@ -139,11 +145,15 @@ func runJSON(config *config.Configuration) {
 }
 
 // runs metrics
-func runMetrics() {
+func runUtilityServer() {
 	http.Handle("/metrics", promhttp.Handler())
 
+	http.Handle("/live", http.HandlerFunc(liveHandler))
+	http.Handle("/health", http.HandlerFunc(healthHandler))
+	http.Handle("/ready", readyHandler(&isServiceReady))
+
 	if err := http.ListenAndServe(":9100", nil); err != nil {
-		log.Panic().Msgf("metrics endpoint failed: %v", err)
+		log.Panic().Msgf("http endpoint failed: %v", err)
 	}
 }
 
@@ -153,11 +163,47 @@ func main() {
 	initTracing(config)
 
 	go runJSON(config)
-	go runMetrics()
+	go runUtilityServer()
 
 	err := run(config)
 
 	if err != nil {
 		log.Fatal().Msgf("Error %e", err)
+	}
+}
+
+// liveHandler is a simple HTTP handler function which writes a response
+func liveHandler(w http.ResponseWriter, _ *http.Request) {
+	body, err := json.Marshal("This service is alive")
+
+	if err != nil {
+		log.Error().Err(err).Msgf("Could not encode info data: %v", err)
+		http.Error(w, http.StatusText(http.StatusServiceUnavailable), http.StatusServiceUnavailable)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_, err = w.Write(body)
+
+	if err != nil {
+		log.Error().Err(err).Msgf("Could not write body: %v", err)
+		return
+	}
+}
+
+// healthHandler is a Liveness probe
+func healthHandler(w http.ResponseWriter, _ *http.Request) {
+	w.WriteHeader(http.StatusOK)
+}
+
+// readyHandler is a Readiness probe
+func readyHandler(isReady *atomic.Value) http.HandlerFunc {
+	return func(w http.ResponseWriter, _ *http.Request) {
+		if isReady == nil || !isReady.Load().(bool) {
+			http.Error(w, http.StatusText(http.StatusServiceUnavailable), http.StatusServiceUnavailable)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
 	}
 }

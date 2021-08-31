@@ -50,7 +50,6 @@ type event struct {
 	requestId   uint64
 	eventType   EventType
 	err         error
-	traceId     string
 	span        map[string]string
 	encodedData []byte //caching to avoid double encoding on Length() and Encode()
 	encodeErr   error

@@ -21,7 +21,7 @@ type promReporter struct {
 	listCounter   *prometheus.CounterVec
 }
 
-func NewReporter() Reporter {
+func NewReporter() *promReporter {
 	return &promReporter{
 		createCounter: promauto.NewCounterVec(prometheus.CounterOpts{
 			Name: "experiences_objects_create",
